@@ -1,20 +1,55 @@
 {
-  "name": "content",
-  "fields": [
-    "id",
-    "domain",
-    "text"
-  ],
+  "name": "Content",
+  "version": "0.1.0",
+  "owner": "WebEngine",
   "identity": [
     "domain",
     "id"
   ],
-  "lookup": "(domain, id) -> text",
+  "fields": [
+    "id",
+    "domain",
+    "type",
+    "provider",
+    "content"
+  ],
+  "types": [
+    "text",
+    "image",
+    "svg",
+    "video",
+    "embed",
+    "file"
+  ],
+  "semantics": {
+    "id": "canonical content identifier within a domain",
+    "domain": "content ownership namespace",
+    "type": "how the resolved content resource is presented",
+    "provider": "resolver namespace describing where or through which resolver the resource is obtained",
+    "content": "inline payload or provider-relative resource identifier"
+  },
+  "providerRules": [
+    "provider is not limited to external services",
+    "provider may resolve to an asset namespace or directory",
+    "embed providers such as youtube are handled by provider-specific resolvers",
+    "asset providers resolve relative resource identifiers; absolute filesystem paths and parent traversal are forbidden"
+  ],
+  "typeSemantics": {
+    "text": "textual content resource",
+    "image": "raster image resource",
+    "svg": "SVG resource",
+    "video": "video resource",
+    "embed": "provider-resolved external embedded resource",
+    "file": "generic file resource"
+  },
   "rules": [
-    "content owns text only",
-    "content does not own page layout",
-    "content does not own routing",
-    "content does not own renderer behavior",
-    "all content for one domain can be fetched or removed by domain"
+    "WebEngine owns the Content subsystem, storage contract, lookup and resolver lifecycle",
+    "Content is page/site content only",
+    "Content does not own navigation items or navigation labels",
+    "Content does not own actions, buttons or action labels",
+    "Content does not own page layout, routing or domain behavior",
+    "type describes presentation semantics; provider describes source resolution",
+    "projectors reference canonical content identity instead of physical paths or provider-specific URLs",
+    "all content for one domain can be addressed as one namespace"
   ]
 }
