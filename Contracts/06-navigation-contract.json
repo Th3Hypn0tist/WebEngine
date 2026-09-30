@@ -1,0 +1,27 @@
+{
+  "name": "Navigation",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "purpose": "canonical navigation structure and navigation presentation metadata",
+  "owns": [
+    "navigation item identity",
+    "navigation labels",
+    "navigation targets",
+    "navigation hierarchy"
+  ],
+  "minimumRecord": [
+    "id",
+    "label",
+    "target"
+  ],
+  "optionalStructure": [
+    "parent"
+  ],
+  "rules": [
+    "navigation is not Content",
+    "navigation labels are owned by Navigation",
+    "navigation targets reference routes or public surfaces; they do not become route authority by duplication",
+    "active state is derived from routing/page context and is not canonical navigation data",
+    "page actions and command buttons are not Navigation"
+  ]
+}
