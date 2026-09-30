@@ -1,0 +1,11 @@
+{
+  "name": "@th3hypn0tist/webengine",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./webengine.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}
