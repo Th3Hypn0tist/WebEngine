@@ -1,0 +1,25 @@
+{
+  "name": "WebEngine",
+  "version": "0.1.0",
+  "kind": "shared web application runtime",
+  "runtime": "browser",
+  "canonicalPublicEntry": "/lib/webengine/webengine.js",
+  "dependsOn": [
+    "WebGUI where DOM/UI primitives are required"
+  ],
+  "principles": [
+    "one canonical authority per concern",
+    "the same canonical truth may have many projections",
+    "projectors are declarative definitions",
+    "renderers are executable presentation implementations",
+    "domain logic remains in the domain",
+    "derived paths are not duplicated in contracts"
+  ],
+  "mustNot": [
+    "contain LMTS, IAM, Freemarket or other domain business logic",
+    "own visual styling",
+    "reimplement WebGUI DOM primitives",
+    "reimplement S3D spatial primitives",
+    "be an authorization authority"
+  ]
+}
