@@ -8,6 +8,8 @@
     "03-renderer-contract.json",
     "04-content-contract.json",
     "05-access-contract.json",
+    "06-navigation-contract.json",
+    "07-actions-contract.json",
     "manifest.json"
   ],
   "status": "active"
