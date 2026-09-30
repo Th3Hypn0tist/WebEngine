@@ -1,0 +1,20 @@
+{
+  "name": "content",
+  "fields": [
+    "id",
+    "domain",
+    "text"
+  ],
+  "identity": [
+    "domain",
+    "id"
+  ],
+  "lookup": "(domain, id) -> text",
+  "rules": [
+    "content owns text only",
+    "content does not own page layout",
+    "content does not own routing",
+    "content does not own renderer behavior",
+    "all content for one domain can be fetched or removed by domain"
+  ]
+}
