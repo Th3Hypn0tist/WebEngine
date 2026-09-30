@@ -1,0 +1,21 @@
+{
+  "defaultResolution": {
+    "projector": "LMTS:ranking",
+    "renderer": "/app/lmts/renderers/ranking.js"
+  },
+  "defaultRule": "the default renderer is derived from the base projector id",
+  "javascriptInterface": {
+    "required": [
+      "mount(target, projection, context)"
+    ],
+    "optional": [
+      "destroy()"
+    ]
+  },
+  "rules": [
+    "renderers are outside the projector tree",
+    "a renderer may use WebGUI, S3D or native browser capabilities",
+    "a renderer does not become the authority for domain data or authorization",
+    "a renderer override must be explicit because the default path is derived"
+  ]
+}
