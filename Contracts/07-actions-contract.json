@@ -1,0 +1,24 @@
+{
+  "name": "Actions",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "purpose": "canonical user-triggered action declarations and presentation metadata",
+  "owns": [
+    "action item identity",
+    "action labels",
+    "binding from a presented control to a domain-defined action"
+  ],
+  "minimumRecord": [
+    "id",
+    "label",
+    "action"
+  ],
+  "rules": [
+    "actions are not Content",
+    "button/action labels are owned by Actions",
+    "Actions declares and binds user intent but does not own domain business behavior",
+    "action execution belongs to the owning domain service",
+    "authorization for an action/resource is decided by AccessCore when required",
+    "presentation visibility is not a security boundary"
+  ]
+}
