@@ -7,9 +7,21 @@
   "dependsOn": [
     "WebGUI where DOM/UI primitives are required"
   ],
+  "owns": [
+    "projector resolution and composition",
+    "renderer lifecycle orchestration",
+    "Content subsystem",
+    "Navigation subsystem",
+    "Actions subsystem",
+    "routing and page context",
+    "shared shell behavior",
+    "IAM identity context integration",
+    "AccessCore authorization integration"
+  ],
   "principles": [
     "one canonical authority per concern",
     "the same canonical truth may have many projections",
+    "Content, Navigation and Actions are separate canonical concerns",
     "projectors are declarative definitions",
     "renderers are executable presentation implementations",
     "domain logic remains in the domain",
@@ -20,6 +32,7 @@
     "own visual styling",
     "reimplement WebGUI DOM primitives",
     "reimplement S3D spatial primitives",
-    "be an authorization authority"
+    "be an authorization authority",
+    "store navigation or action semantics as Content"
   ]
 }
