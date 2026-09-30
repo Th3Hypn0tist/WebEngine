@@ -1,0 +1,14 @@
+{
+  "package": "webengine-contracts",
+  "version": "0.1.0",
+  "files": [
+    "00-engine-contract.json",
+    "01-domain-layout.json",
+    "02-projector-contract.json",
+    "03-renderer-contract.json",
+    "04-content-contract.json",
+    "05-access-contract.json",
+    "manifest.json"
+  ],
+  "status": "active"
+}
