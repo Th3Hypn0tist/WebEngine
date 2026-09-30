@@ -1,0 +1,23 @@
+{
+  "identityAuthority": "IAM",
+  "authorizationAuthority": "AccessCore",
+  "accessCoreDecision": {
+    "input": [
+      "subject",
+      "action",
+      "resource",
+      "context"
+    ],
+    "output": "allow | deny"
+  },
+  "webEngineRole": [
+    "supply available identity context",
+    "request an AccessCore decision when a projection requires authorization",
+    "mount or withhold the projection according to the decision"
+  ],
+  "mustNot": [
+    "implement authorization policy",
+    "infer permissions from UI state",
+    "treat a hidden projector as a service-side security boundary"
+  ]
+}
