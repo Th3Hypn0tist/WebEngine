@@ -1,0 +1,16 @@
+{
+  "domainRoot": "/app/<domain>/",
+  "directories": {
+    "contracts": "canonical domain definitions",
+    "services": "private domain behavior",
+    "api": "public machine interface when explicitly exposed",
+    "renderers": "executable presentation implementations",
+    "projectors": "public declarative presentation definitions"
+  },
+  "rules": [
+    "a public projector may require IAM authentication and/or AccessCore authorization",
+    "public does not mean anonymous",
+    "services are not public presentation surfaces",
+    "a domain owns everything below its canonical domain root"
+  ]
+}
