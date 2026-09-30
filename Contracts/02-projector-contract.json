@@ -1,0 +1,23 @@
+{
+  "idGrammar": "DOMAIN:PROJECTOR[:VARIANT...]",
+  "baseResolution": {
+    "example": "LMTS:ranking",
+    "definitions": [
+      "/app/lmts/projectors/ranking.json"
+    ]
+  },
+  "variantResolution": {
+    "example": "LMTS:ranking:top3",
+    "definitions": [
+      "/app/lmts/projectors/ranking.json",
+      "/app/lmts/projectors/ranking/top3.json"
+    ],
+    "rule": "variant definitions are declarative deltas applied after their parent definitions"
+  },
+  "rules": [
+    "projector definitions contain data, not executable code",
+    "the domain and projector path are derived from the projector id",
+    "do not store an entry path when it can be derived from the id",
+    "the same projector may be composed into any number of pages or surfaces"
+  ]
+}
