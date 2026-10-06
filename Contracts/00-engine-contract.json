@@ -1,6 +1,6 @@
 {
   "name": "WebEngine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "kind": "shared web application runtime",
   "runtime": "browser",
   "canonicalPublicEntry": "/lib/webengine/webengine.js",
@@ -16,6 +16,7 @@
     "Actions subsystem",
     "routing and page context",
     "shared shell behavior",
+    "WebEngine application/composition presentation semantics under the .we-* namespace",
     "IAM identity context integration",
     "AccessCore authorization integration"
   ],
@@ -28,11 +29,14 @@
     "projectors are declarative definitions",
     "renderers are executable presentation implementations",
     "domain logic remains in the domain",
-    "derived paths are not duplicated in contracts"
+    "derived paths are not duplicated in contracts",
+    "WebEngine owns presentation semantics while Style owns visual implementation"
   ],
   "mustNot": [
     "contain LMTS, IAM, Freemarket or other domain business logic",
     "own visual styling",
+    "encode visual appearance into .we-* semantic class names",
+    "use .we-* as a namespace for domain business semantics",
     "reimplement WebGUI DOM primitives",
     "reimplement S3D spatial primitives",
     "be an authorization authority",
