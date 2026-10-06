@@ -1,6 +1,6 @@
 {
   "name": "WebEngine",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "kind": "shared web application runtime",
   "runtime": "browser",
   "canonicalPublicEntry": "/lib/webengine/webengine.js",
@@ -11,7 +11,8 @@
     "projector resolution and composition",
     "renderer lifecycle orchestration",
     "Content subsystem",
-    "Navigation subsystem",
+    "SiteTree contract, parsing, validation, indexing, resolution and derived projections",
+    "Navigation projection subsystem",
     "Actions subsystem",
     "routing and page context",
     "shared shell behavior",
@@ -21,7 +22,9 @@
   "principles": [
     "one canonical authority per concern",
     "the same canonical truth may have many projections",
-    "Content, Navigation and Actions are separate canonical concerns",
+    "the public site hierarchy exists canonically once as site instance data in /site.json",
+    "Navigation, breadcrumbs, sitemap and active navigation state are projections of SiteTree",
+    "Content, SiteTree, Navigation projections and Actions remain separate concerns",
     "projectors are declarative definitions",
     "renderers are executable presentation implementations",
     "domain logic remains in the domain",
@@ -33,6 +36,8 @@
     "reimplement WebGUI DOM primitives",
     "reimplement S3D spatial primitives",
     "be an authorization authority",
-    "store navigation or action semantics as Content"
+    "store navigation or action semantics as Content",
+    "create an independent navigation hierarchy beside SiteTree",
+    "store AIGM.fi site instance data such as /site.json inside /lib/webengine/"
   ]
 }
