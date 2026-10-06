@@ -120,6 +120,48 @@ derived projection mechanisms
 
 The AIGM.fi instance owns the actual `/site.json` data.
 
+## Presentation contract
+
+WebEngine owns the semantic meaning of the shared application/composition namespace:
+
+```text
+.we-*
+```
+
+Current public classes:
+
+```text
+.we-shell
+.we-header
+.we-main
+.we-nav
+.we-nav-item
+.we-page
+.we-section
+.we-projector
+.we-projector-header
+.we-projector-body
+.we-content
+```
+
+These names describe structural/application semantics, not visual appearance.
+
+State is represented with semantic carriers where a dedicated structural class is unnecessary:
+
+```text
+data-state
+data-status
+data-variant
+aria-current
+native disabled state
+```
+
+The owning subsystem defines the value vocabulary for a state carrier. The presentation contract does not invent renderer lifecycle states, business statuses or domain variants.
+
+WebEngine owns the semantics. Style owns their visual implementation. WebGUI keeps its separate `.wg-*` primitive namespace.
+
+Presentation state is never authorization authority.
+
 ## Content contract
 
 Canonical fields:
