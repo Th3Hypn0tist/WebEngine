@@ -1,0 +1,54 @@
+{
+  "name": "SiteTree",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "kind": "public site hierarchy mechanism",
+  "canonicalInstance": "/site.json",
+  "purpose": "provide one human-editable canonical authority for the public site hierarchy and deterministic derived projections",
+  "ownership": {
+    "WebEngine": [
+      "SiteTree contract",
+      "parser",
+      "validator",
+      "indexer",
+      "resolver",
+      "derived projection mechanisms"
+    ],
+    "siteInstance": [
+      "/site.json contents",
+      "AIGM.fi public hierarchy instance data"
+    ]
+  },
+  "nodeShape": [
+    "id",
+    "label",
+    "path",
+    "children"
+  ],
+  "nodeSemantics": {
+    "id": "canonical node identity inside the SiteTree instance",
+    "label": "canonical public label for the node",
+    "path": "public path when the node is addressable",
+    "children": "ordered child SiteTree nodes"
+  },
+  "derivedProjections": [
+    "global navigation",
+    "local/topic navigation",
+    "breadcrumbs",
+    "sitemap",
+    "current section",
+    "active navigation state",
+    "public site path resolution"
+  ],
+  "rules": [
+    "/site.json is site instance data and must not live under /lib/webengine/",
+    "SiteTree is the only canonical public hierarchy authority",
+    "Navigation, breadcrumbs and sitemap are derived from SiteTree",
+    "derived projections may be duplicated; hierarchy authority may not",
+    "public means exposed or addressable and does not imply anonymous access",
+    "public topic architecture and technical/runtime ownership are separate layers",
+    "API and service routing are separate machine-interface concerns and must not be inferred from SiteTree",
+    "invalid or ambiguous SiteTree data must not be repaired by inventing a second hierarchy",
+    "SiteTree must not infer authorization from hierarchy, paths or visibility"
+  ]
+}
