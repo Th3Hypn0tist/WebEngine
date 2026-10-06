@@ -1,27 +1,24 @@
 {
   "name": "Navigation",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "WebEngine",
-  "purpose": "canonical navigation structure and navigation presentation metadata",
-  "owns": [
-    "navigation item identity",
-    "navigation labels",
-    "navigation targets",
-    "navigation hierarchy"
-  ],
-  "minimumRecord": [
-    "id",
-    "label",
-    "target"
-  ],
-  "optionalStructure": [
-    "parent"
-  ],
+  "kind": "derived SiteTree projection",
+  "sourceAuthority": "/site.json via the WebEngine SiteTree subsystem",
+  "purpose": "derive navigation presentations from the canonical public site hierarchy without creating a second hierarchy authority",
+  "projections": {
+    "global": "project the children of the SiteTree root",
+    "local": "project the children of the current topic/site node",
+    "breadcrumbs": "project the ancestor chain of the current node",
+    "activeState": "derive current and active navigation state from SiteTree plus page/path context"
+  },
   "rules": [
-    "navigation is not Content",
-    "navigation labels are owned by Navigation",
-    "navigation targets reference routes or public surfaces; they do not become route authority by duplication",
-    "active state is derived from routing/page context and is not canonical navigation data",
-    "page actions and command buttons are not Navigation"
+    "Navigation is not an independent hierarchy authority",
+    "navigation identity, labels, paths and parent-child structure come from SiteTree",
+    "Navigation must not duplicate a separately maintained tree beside /site.json",
+    "active state is derived from current page/path context and is not canonical SiteTree instance data",
+    "page actions and command buttons are Actions, not Navigation",
+    "Refresh and other page-data operations are not Navigation",
+    "API and service routing are separate machine-interface concerns and are not derived from the public SiteTree hierarchy",
+    "Navigation is not Content"
   ]
 }
