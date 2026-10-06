@@ -1,0 +1,64 @@
+{
+  "name": "WebEngine Presentation",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "namespace": ".we-*",
+  "purpose": "define stable semantic hooks for WebEngine application and composition structure without owning visual styling",
+  "publicClasses": {
+    ".we-shell": "top-level WebEngine application shell",
+    ".we-header": "shared application header composition region",
+    ".we-main": "primary application content region",
+    ".we-nav": "navigation composition container",
+    ".we-nav-item": "one projected navigation item",
+    ".we-page": "page-level composition container",
+    ".we-section": "section-level composition container inside a page",
+    ".we-projector": "projector mount/composition boundary",
+    ".we-projector-header": "optional projector heading/header region",
+    ".we-projector-body": "projector rendered-content region",
+    ".we-content": "resolved canonical Content presentation boundary"
+  },
+  "stateEncoding": {
+    "preferred": [
+      "data-state",
+      "data-status",
+      "data-variant",
+      "aria-current",
+      "native disabled state"
+    ],
+    "semantics": {
+      "data-state": "runtime or presentation lifecycle state carrier when the owning subsystem defines such states",
+      "data-status": "semantic status carrier when the owning subsystem defines status values",
+      "data-variant": "presentation/composition variant carrier when a dedicated structural class is unnecessary",
+      "aria-current": "standards-based current-item/current-page state for navigation and equivalent current-context projections",
+      "native disabled state": "native disabled semantics for actual native controls where applicable"
+    },
+    "rules": [
+      "attribute names are stable presentation carriers; their value vocabularies belong to the subsystem contract that owns the represented state",
+      "this contract does not create renderer lifecycle states, domain statuses or business variants",
+      "aria-current must be used according to platform accessibility semantics",
+      "native disabled semantics are preferred over CSS-only disabled appearance for native controls"
+    ]
+  },
+  "ownership": {
+    "WebEngine": [
+      "semantic meaning of .we-* classes",
+      "application/composition structure represented by .we-* classes",
+      "shared state carrier semantics listed by this contract"
+    ],
+    "Style": [
+      "visual implementation of .we-* semantics",
+      "layout, spacing, color, typography and other visual properties",
+      "theme-dependent token values"
+    ]
+  },
+  "rules": [
+    ".we-* describes shared application/composition semantics, never domain business meaning",
+    "Style may consume .we-* and semantic state attributes but must not redefine their meaning",
+    "WebEngine must not encode visual appearance into class names or state values",
+    "WebGUI .wg-* remains the independent namespace for generic DOM/UI primitive semantics",
+    "a domain may compose .we-* structures but must not create a conflicting shared meaning for an existing .we-* class",
+    "domain-specific classes may coexist in domain-owned renderers, but shared Style must not depend on them",
+    "presentation state is not authorization authority",
+    "class presence, absence or visual state must never be treated as proof of authorization"
+  ]
+}
