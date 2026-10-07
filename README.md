@@ -162,6 +162,50 @@ WebEngine owns the semantics. Style owns their visual implementation. WebGUI kee
 
 Presentation state is never authorization authority.
 
+
+
+## Renderer lifecycle
+
+Canonical renderer entry:
+
+```text
+mount(target, projection, context)
+```
+
+A renderer mount may be synchronous or asynchronous. A successful mount may return a mount-instance result:
+
+```text
+{
+  state: "ready" | "empty",   // optional, default = ready
+  destroy: () => void | Promise<void>   // optional
+}
+```
+
+Cleanup belongs to the individual mount instance returned by one `mount()` call. The same renderer module may be mounted concurrently in multiple projector boundaries, so a module-global cleanup function is not the canonical lifecycle model.
+
+WebEngine owns the projector-boundary lifecycle:
+
+```text
+loading
+ready
+empty
+denied
+error
+destroy
+```
+
+The state is published on:
+
+```text
+.we-projector[data-state]
+```
+
+`denied` is produced by WebEngine authorization orchestration and never by the renderer. `error` is produced by orchestration when resolution/loading/mount fails. A successful renderer may report only `ready` or `empty`.
+
+Each mount attempt has its own generation identity. Late async completion from an obsolete generation must never overwrite DOM or lifecycle state belonging to a newer generation. If an obsolete mount later resolves with a cleanup handle, WebEngine destroys that stale instance instead of publishing it.
+
+`destroy` is terminal for one mount generation. A reused projector boundary may later start a new generation from `loading`.
+
 ## Content contract
 
 Canonical fields:
