@@ -85,6 +85,33 @@ function assertProviderRelativeResource(resource) {
   return resource;
 }
 
+function assertResolvedUrl(value, label = 'resolved content URL') {
+  if (typeof value !== 'string' || !value || value !== value.trim()) {
+    throw new TypeError(`${label} must be a non-empty trimmed string`);
+  }
+
+  if (/[\u0000-\u001F\u007F]/.test(value)) {
+    throw new Error(`${label} must not contain control characters`);
+  }
+
+  if (value.startsWith('/') && !value.startsWith('//')) {
+    return value;
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`${label} must be root-relative or use http(s)`);
+  }
+
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    throw new Error(`${label} must be root-relative or use http(s)`);
+  }
+
+  return value;
+}
+
 function createContentProviderRegistry() {
   const resolvers = new Map();
 
@@ -138,14 +165,15 @@ function normalizeResolvedContent(record, source) {
     case 'svg':
     case 'video':
     case 'file': {
-      if (typeof source !== 'string' || !source) {
-        throw new TypeError(`${record.type} provider must resolve to a non-empty URL string`);
-      }
+      const url = assertResolvedUrl(
+        source,
+        `${record.type} provider URL`,
+      );
       return Object.freeze({
         id: record.id,
         domain: record.domain,
         type: record.type,
-        url: source,
+        url,
       });
     }
 
@@ -153,9 +181,7 @@ function normalizeResolvedContent(record, source) {
       if (source == null || typeof source !== 'object' || Array.isArray(source)) {
         throw new TypeError('embed provider must resolve to a structured descriptor');
       }
-      if (typeof source.url !== 'string' || !source.url) {
-        throw new TypeError('embed provider descriptor requires a non-empty url');
-      }
+      const url = assertResolvedUrl(source.url, 'embed provider URL');
       if ('html' in source || 'iframe' in source) {
         throw new Error('embed provider must not return authoritative HTML or iframe payloads');
       }
@@ -166,7 +192,7 @@ function normalizeResolvedContent(record, source) {
         type: 'embed',
         provider: record.provider,
         resource: record.content,
-        url: source.url,
+        url,
       };
 
       if (source.title != null) {
@@ -243,6 +269,7 @@ export {
   validateContentRecord,
   freezeContentRecord,
   assertProviderRelativeResource,
+  assertResolvedUrl,
   createContentProviderRegistry,
   createInlineTextProvider,
   createAssetProvider,
