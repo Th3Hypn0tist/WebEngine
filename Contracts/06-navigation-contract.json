@@ -1,24 +1,63 @@
 {
   "name": "Navigation",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "owner": "WebEngine",
   "kind": "derived SiteTree projection",
   "sourceAuthority": "/site.json via the WebEngine SiteTree subsystem",
-  "purpose": "derive navigation presentations from the canonical public site hierarchy without creating a second hierarchy authority",
+  "purpose": "derive navigation and hierarchy presentations from canonical SiteTree truth without creating a second hierarchy authority",
+  "projectionRecord": {
+    "fields": [
+      "id",
+      "label",
+      "path when present"
+    ],
+    "rule": "projection records are detached immutable values and are not canonical SiteTree node references"
+  },
   "projections": {
-    "global": "project the children of the SiteTree root",
-    "local": "project the children of the current topic/site node",
-    "breadcrumbs": "project the ancestor chain of the current node",
-    "activeState": "derive current and active navigation state from SiteTree plus page/path context"
+    "global": {
+      "function": "projectGlobalNavigation(siteTree)",
+      "semantics": "ordered projection of the SiteTree root children"
+    },
+    "local": {
+      "function": "projectLocalNavigation(siteTree, currentPath)",
+      "semantics": "ordered projection of the exact current SiteTree node children; unknown current path or leaf yields an empty projection"
+    },
+    "breadcrumbs": {
+      "function": "projectBreadcrumbs(siteTree, currentPath)",
+      "semantics": "root-to-current lineage including the current node; unaddressable structural nodes remain present with no invented path"
+    },
+    "sitemap": {
+      "function": "projectSitemap(siteTree)",
+      "semantics": "recursive detached projection of the complete canonical SiteTree"
+    },
+    "currentSection": {
+      "function": "resolveCurrentSection(siteTree, currentPath)",
+      "semantics": "the first node below the SiteTree root on the current lineage; unknown path or root itself yields null"
+    },
+    "activeState": {
+      "function": "projectActiveNavigationState(siteTree, currentPath)",
+      "shape": {
+        "currentId": "exact current node id or null",
+        "ancestorIds": "ordered root-to-parent id list"
+      }
+    }
+  },
+  "pathContext": {
+    "resolution": "exact canonical path lookup",
+    "unknown": "unknown syntactically valid path produces empty/null inactive projection according to the projection return type",
+    "mustNot": "lowercase, append/remove slash, prefix-match or otherwise normalize current path identity"
   },
   "rules": [
     "Navigation is not an independent hierarchy authority",
     "navigation identity, labels, paths and parent-child structure come from SiteTree",
     "Navigation must not duplicate a separately maintained tree beside /site.json",
+    "projection records may be duplicated freely because they are not hierarchy authority",
     "active state is derived from current page/path context and is not canonical SiteTree instance data",
+    "current section is derived from ancestry and is not stored separately",
     "page actions and command buttons are Actions, not Navigation",
     "Refresh and other page-data operations are not Navigation",
     "API and service routing are separate machine-interface concerns and are not derived from the public SiteTree hierarchy",
-    "Navigation is not Content"
+    "Navigation is not Content",
+    "Navigation projections do not infer authorization from hierarchy or visibility"
   ]
 }
