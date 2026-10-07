@@ -59,14 +59,15 @@
       "empty -> destroy",
       "denied -> destroy",
       "error -> destroy",
-      "destroy -> loading for a new generation on a reused boundary"
+      "destroy -> loading"
     ],
     "rules": [
       "ready and empty are the only lifecycle outcomes a successful renderer mount may report",
       "denied is owned by WebEngine authorization orchestration and is never returned by a renderer",
       "error is produced by orchestration when an operation fails and is never used as a renderer success result",
       "destroy is terminal for one mount generation even when the DOM boundary is later reused by a new generation",
-      "presentation state does not grant or revoke authorization"
+      "presentation state does not grant or revoke authorization",
+      "destroy -> loading is allowed only when the same DOM boundary is reused for a distinct new generation"
     ]
   },
   "destroySemantics": {
