@@ -308,6 +308,56 @@ Each mount attempt has its own generation identity. Late async completion from a
 
 `destroy` is terminal for one mount generation. A reused projector boundary may later start a new generation from `loading`.
 
+
+
+## Renderer runtime
+
+Renderer modules are resolved from the canonical projector ID:
+
+```text
+LMTS:ranking
+-> /app/lmts/renderers/ranking.js
+```
+
+An explicit override is allowed only inside the same domain renderer root.
+
+Runtime API:
+
+```js
+validateRendererModuleUrl(url, projectorId)
+resolveRendererModuleUrl(projectorId, { override })
+loadRendererModule(url, options)
+normalizeMountResult(value)
+mountResolvedProjector(boundary, resolvedProjector, context, options)
+denyRendererBoundary(boundary, options)
+destroyRendererBoundary(boundary, options)
+```
+
+Each mount uses a boundary-local monotonic generation id and an isolated staging target. Renderer DOM is committed into the live `.we-projector` boundary only if the generation is still current after async mount completion.
+
+This prevents stale async mounts from overwriting a newer projection.
+
+Renderer cleanup is mount-instance scoped. A returned `destroy()` handle is invoked at most once for the generation that created it.
+
+Lifecycle state is published only through:
+
+```text
+.we-projector[data-state]
+```
+
+with:
+
+```text
+loading
+ready
+empty
+denied
+error
+destroy
+```
+
+`ready` and `empty` may come from successful renderer mount results. `denied`, `error` and `destroy` remain WebEngine orchestration states.
+
 ## Content contract
 
 Canonical fields:
