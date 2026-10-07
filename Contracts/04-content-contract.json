@@ -1,6 +1,6 @@
 {
   "name": "Content",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "WebEngine",
   "identity": [
     "domain",
@@ -28,12 +28,49 @@
     "provider": "resolver namespace describing where or through which resolver the resource is obtained",
     "content": "inline payload or provider-relative resource identifier"
   },
+  "validation": [
+    "a Content record contains only id, domain, type, provider and content",
+    "id, domain and provider use [A-Za-z0-9][A-Za-z0-9_-]* identifiers",
+    "type is one of the canonical Content types",
+    "content is a string",
+    "validation does not infer navigation, action, layout or domain semantics"
+  ],
+  "providerModel": {
+    "registry": "providers are explicitly registered by provider id",
+    "resolution": "provider receives a frozen canonical Content record and optional caller context",
+    "authority": "provider resolves source location/value only; it does not redefine Content type semantics",
+    "unknownProvider": "resolution fails closed",
+    "duplicateProvider": "registration fails instead of silently replacing an existing resolver"
+  },
   "providerRules": [
     "provider is not limited to external services",
     "provider may resolve to an asset namespace or directory",
     "embed providers such as youtube are handled by provider-specific resolvers",
-    "asset providers resolve relative resource identifiers; absolute filesystem paths and parent traversal are forbidden"
+    "asset/embed provider resource identifiers are relative to their provider namespace",
+    "absolute filesystem paths, absolute resource URLs in canonical content identifiers, backslash paths and parent/current-directory traversal are forbidden",
+    "embed providers return structured descriptors and never authoritative HTML or iframe payloads"
   ],
+  "resolvedTypes": {
+    "text": {
+      "shape": "id, domain, type=text, text"
+    },
+    "image": {
+      "shape": "id, domain, type=image, url"
+    },
+    "svg": {
+      "shape": "id, domain, type=svg, url"
+    },
+    "video": {
+      "shape": "id, domain, type=video, url"
+    },
+    "file": {
+      "shape": "id, domain, type=file, url"
+    },
+    "embed": {
+      "shape": "id, domain, type=embed, provider, resource, url, optional title",
+      "rule": "embed resolution remains structured data; arbitrary HTML is not accepted as authority"
+    }
+  },
   "typeSemantics": {
     "text": "textual content resource",
     "image": "raster image resource",
@@ -42,14 +79,25 @@
     "embed": "provider-resolved external embedded resource",
     "file": "generic file resource"
   },
+  "runtimeHelpers": [
+    "validateContentRecord(record)",
+    "freezeContentRecord(record)",
+    "createContentProviderRegistry()",
+    "createInlineTextProvider()",
+    "createAssetProvider(baseUrl)",
+    "createEmbedProvider(resolveResource)",
+    "resolveContent(record, registry, context)"
+  ],
   "rules": [
-    "WebEngine owns the Content subsystem, storage contract, lookup and resolver lifecycle",
+    "WebEngine owns the Content subsystem contract, lookup and resolver lifecycle",
+    "Content persistence backend is not fixed by this runtime step",
     "Content is page/site content only",
     "Content does not own navigation items or navigation labels",
     "Content does not own actions, buttons or action labels",
     "Content does not own page layout, routing or domain behavior",
     "type describes presentation semantics; provider describes source resolution",
     "projectors reference canonical content identity instead of physical paths or provider-specific URLs",
-    "all content for one domain can be addressed as one namespace"
+    "all content for one domain can be addressed as one namespace",
+    "resolved Content descriptors are presentation inputs and do not become source authority"
   ]
 }
