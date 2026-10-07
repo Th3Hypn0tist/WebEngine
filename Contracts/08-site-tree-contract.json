@@ -1,6 +1,6 @@
 {
   "name": "SiteTree",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "WebEngine",
   "kind": "public site hierarchy mechanism",
   "canonicalInstance": "/site.json",
@@ -26,10 +26,33 @@
     "children"
   ],
   "nodeSemantics": {
-    "id": "canonical node identity inside the SiteTree instance",
+    "id": "canonical globally unique node identity inside one SiteTree instance",
     "label": "canonical public label for the node",
-    "path": "public path when the node is addressable",
-    "children": "ordered child SiteTree nodes"
+    "path": "optional globally unique public path when the node is addressable",
+    "children": "optional ordered child SiteTree nodes; runtime canonical snapshot represents a leaf as an empty children array"
+  },
+  "runtimeValidation": [
+    "a node contains only id, label, path and children",
+    "id is required, trimmed by construction and matches [A-Za-z0-9][A-Za-z0-9_-]*",
+    "label is required and is a non-empty trimmed string",
+    "path is optional; when present it is a non-empty trimmed absolute public path beginning with /",
+    "path contains no query or fragment component",
+    "ids are globally unique inside one SiteTree instance",
+    "paths are globally unique among addressable nodes inside one SiteTree instance",
+    "children is an array when present",
+    "cycles and reused node objects are rejected",
+    "validation does not normalize, repair or infer missing authority"
+  ],
+  "runtimeIndex": {
+    "snapshot": "createSiteTreeIndex creates an isolated immutable runtime snapshot from validated instance data",
+    "idLookup": "exact canonical id lookup",
+    "pathLookup": "exact canonical path lookup",
+    "unknown": "a syntactically valid unknown id/path resolves to null",
+    "normalization": "resolver does not lowercase, append slashes, remove slashes or otherwise normalize lookup identity"
+  },
+  "loader": {
+    "default": "/site.json",
+    "failure": "load/parse/validation failure rejects; no fallback hierarchy is invented"
   },
   "derivedProjections": [
     "global navigation",
