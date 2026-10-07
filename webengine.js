@@ -14,7 +14,16 @@ import {
   loadSiteTree,
 } from './core/site-tree.js';
 
-const WEBENGINE_VERSION = '0.2.0';
+import {
+  projectGlobalNavigation,
+  projectLocalNavigation,
+  projectBreadcrumbs,
+  projectSitemap,
+  resolveCurrentSection,
+  projectActiveNavigationState,
+} from './core/site-tree-projections.js';
+
+const WEBENGINE_VERSION = '0.3.0';
 
 export {
   WEBENGINE_VERSION,
@@ -28,4 +37,10 @@ export {
   resolveSiteNodeById,
   resolveSiteNodeByPath,
   loadSiteTree,
+  projectGlobalNavigation,
+  projectLocalNavigation,
+  projectBreadcrumbs,
+  projectSitemap,
+  resolveCurrentSection,
+  projectActiveNavigationState,
 };
