@@ -45,7 +45,17 @@ import {
   resolveProjector,
 } from './core/projector-resolver.js';
 
-const WEBENGINE_VERSION = '0.5.0';
+import {
+  validateRendererModuleUrl,
+  resolveRendererModuleUrl,
+  loadRendererModule,
+  normalizeMountResult,
+  mountResolvedProjector,
+  denyRendererBoundary,
+  destroyRendererBoundary,
+} from './core/renderer.js';
+
+const WEBENGINE_VERSION = '0.6.0';
 
 export {
   WEBENGINE_VERSION,
@@ -81,4 +91,11 @@ export {
   loadProjectorDefinition,
   createProjectorResolutionContext,
   resolveProjector,
+  validateRendererModuleUrl,
+  resolveRendererModuleUrl,
+  loadRendererModule,
+  normalizeMountResult,
+  mountResolvedProjector,
+  denyRendererBoundary,
+  destroyRendererBoundary,
 };
