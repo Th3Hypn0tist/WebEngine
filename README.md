@@ -299,6 +299,53 @@ type=text, provider=inline, content=<text>
 
 Projectors consume canonical content references; they do not own physical asset paths or provider-specific resolution logic.
 
+
+
+## Content runtime
+
+Canonical Content records remain:
+
+```text
+id
+domain
+type
+provider
+content
+```
+
+The runtime exposes:
+
+```js
+validateContentRecord(record)
+freezeContentRecord(record)
+createContentProviderRegistry()
+createInlineTextProvider()
+createAssetProvider(baseUrl)
+createEmbedProvider(resolveResource)
+resolveContent(record, registry, context)
+```
+
+Providers resolve source values only. They do not redefine Content type semantics.
+
+Resolved descriptors are typed by WebEngine:
+
+```text
+text   -> { id, domain, type, text }
+image  -> { id, domain, type, url }
+svg    -> { id, domain, type, url }
+video  -> { id, domain, type, url }
+file   -> { id, domain, type, url }
+embed  -> { id, domain, type, provider, resource, url, title? }
+```
+
+Canonical asset/embed resource identifiers are provider-relative. Parent/current-directory traversal, absolute canonical resource URLs and backslash paths are rejected.
+
+Provider-returned URLs exposed by WebEngine must be root-relative or use HTTP(S). Executable/opaque schemes such as `javascript:`, `data:`, `file:` and `blob:` are rejected.
+
+Embeds remain structured descriptors. Providers cannot return authoritative HTML or iframe payloads.
+
+This runtime step does not choose a Content persistence backend and does not implement projector loading.
+
 ## Identity and authorization
 
 IAM answers **who** the subject is.
