@@ -6,6 +6,7 @@ import {
   validateContentRecord,
   freezeContentRecord,
   assertProviderRelativeResource,
+  assertResolvedUrl,
   createContentProviderRegistry,
   createInlineTextProvider,
   createAssetProvider,
@@ -214,4 +215,57 @@ test('provider resolver receives frozen canonical record and caller context', as
   assert.ok(Object.isFrozen(receivedRecord));
   assert.equal(receivedRecord.content, 'Hello');
   assert.equal(receivedContext, context);
+});
+
+
+test('accepts only root-relative or http(s) resolved URLs', () => {
+  assert.equal(assertResolvedUrl('/assets/logo.svg'), '/assets/logo.svg');
+  assert.equal(assertResolvedUrl('https://example.com/file'), 'https://example.com/file');
+  assert.equal(assertResolvedUrl('http://localhost/file'), 'http://localhost/file');
+
+  for (const value of [
+    '//example.com/file',
+    'javascript:alert(1)',
+    'data:text/html,<script>alert(1)</script>',
+    'file:///etc/passwd',
+    'blob:https://example.com/id',
+    'relative/file.svg',
+  ]) {
+    assert.throws(() => assertResolvedUrl(value));
+  }
+});
+
+test('rejects unsafe provider-returned URLs before typed descriptors are exposed', async () => {
+  const assetRegistry = createContentProviderRegistry()
+    .register('unsafeasset', () => 'javascript:alert(1)');
+
+  await assert.rejects(
+    resolveContent(
+      record({
+        type: 'image',
+        provider: 'unsafeasset',
+        content: 'image.png',
+      }),
+      assetRegistry,
+    ),
+    /root-relative or use http\(s\)/,
+  );
+
+  const embedRegistry = createContentProviderRegistry()
+    .register(
+      'unsafeembed',
+      createEmbedProvider(() => ({ url: 'data:text/html,boom' })),
+    );
+
+  await assert.rejects(
+    resolveContent(
+      record({
+        type: 'embed',
+        provider: 'unsafeembed',
+        content: 'resource',
+      }),
+      embedRegistry,
+    ),
+    /root-relative or use http\(s\)/,
+  );
 });
