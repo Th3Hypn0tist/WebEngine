@@ -147,6 +147,36 @@ The runtime does not normalize or repair hierarchy identity. IDs and public path
 
 This step implements SiteTree loading, parsing, validation, indexing and exact resolution only. Navigation, breadcrumbs and other SiteTree projections remain a separate layer.
 
+
+
+## SiteTree projections
+
+SiteTree projection helpers derive presentation data from the canonical runtime snapshot without exposing canonical nodes as mutable presentation state:
+
+```js
+projectGlobalNavigation(siteTree)
+projectLocalNavigation(siteTree, currentPath)
+projectBreadcrumbs(siteTree, currentPath)
+projectSitemap(siteTree)
+resolveCurrentSection(siteTree, currentPath)
+projectActiveNavigationState(siteTree, currentPath)
+```
+
+Semantics:
+
+```text
+global navigation = root children
+local navigation  = exact current node children
+breadcrumbs       = root -> current lineage
+sitemap           = recursive detached SiteTree projection
+current section   = first node below the SiteTree root
+active state      = current node id + ordered ancestor ids
+```
+
+All projections are detached immutable values. They may be duplicated anywhere without becoming hierarchy authority.
+
+Current-path resolution is exact. Projection logic does not lowercase paths, append or remove slashes, prefix-match, or infer hierarchy from URL strings. Unknown paths produce the projection type's empty/null inactive result.
+
 ## Presentation contract
 
 WebEngine owns the semantic meaning of the shared application/composition namespace:
