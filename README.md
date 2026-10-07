@@ -66,6 +66,51 @@ The default renderer for both is derived from the base projector:
 
 A variant defines only the delta from its parent projection.
 
+
+
+## Projector resolver
+
+Projector definitions remain declarative JSON data.
+
+Runtime API:
+
+```js
+validateProjectorDefinition(definition)
+parseProjectorDefinition(source)
+mergeProjectorDelta(parent, delta)
+loadProjectorDefinition(url)
+createProjectorResolutionContext({ maxDepth })
+resolveProjector(id, options)
+```
+
+Canonical resolution:
+
+```text
+LMTS:ranking
+  -> /app/lmts/projectors/ranking.json
+
+LMTS:ranking:top3
+  -> /app/lmts/projectors/ranking.json
+  -> /app/lmts/projectors/ranking/top3.json
+```
+
+Merge semantics are intentionally minimal:
+
+```text
+object + object -> recursive merge
+array           -> replace
+scalar          -> replace
+null            -> replace
+```
+
+There are no deletion operators, expressions, conditions or executable projector directives. Projector JSON remains data rather than becoming a programming language.
+
+Top-level `id`, `domain` and `entry` are rejected because they are derivable from the canonical projector ID.
+
+Resolved projections are deep-frozen. Missing/invalid definitions fail closed and partial merge results are never returned.
+
+Nested resolution must reuse the active resolution context. The context rejects canonical projector cycles and enforces a bounded recursion depth.
+
 ## Canonical concerns
 
 ```text
