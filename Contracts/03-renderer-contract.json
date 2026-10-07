@@ -1,13 +1,22 @@
 {
   "name": "Renderer Lifecycle",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "owner": "WebEngine",
-  "purpose": "define renderer resolution, mount-instance cleanup and projector-boundary lifecycle semantics without making renderers authorities for domain data, authorization or application state",
+  "purpose": "define renderer resolution, isolated loading/mounting, generation-safe commit, mount-instance cleanup and projector-boundary lifecycle semantics",
   "defaultResolution": {
     "projector": "LMTS:ranking",
     "renderer": "/app/lmts/renderers/ranking.js"
   },
-  "defaultRule": "the default renderer is derived from the base projector id",
+  "resolution": {
+    "default": "renderer URL is derived from the base projector id",
+    "override": "optional explicit trusted-orchestration override",
+    "overrideBoundary": "override must remain under /app/<projector-domain>/renderers/ and identify a .js module",
+    "mustNot": [
+      "derive renderer path from DOM state",
+      "allow cross-domain renderer override",
+      "accept remote, query-bearing, fragment-bearing or traversal renderer URLs"
+    ]
+  },
   "javascriptInterface": {
     "requiredExport": "mount",
     "signature": "mount(target, projection, context)",
@@ -31,22 +40,33 @@
       }
     }
   },
+  "runtimeApi": [
+    "validateRendererModuleUrl(url, projectorId)",
+    "resolveRendererModuleUrl(projectorId, { override })",
+    "loadRendererModule(url, options)",
+    "normalizeMountResult(value)",
+    "mountResolvedProjector(boundary, resolvedProjector, context, options)",
+    "denyRendererBoundary(boundary, options)",
+    "destroyRendererBoundary(boundary, options)"
+  ],
   "mountSemantics": {
-    "target": "WebEngine-owned mount boundary for this projection instance; renderer must not mutate outside it",
+    "boundary": "live .we-projector lifecycle boundary carrying data-state",
+    "target": "generation-isolated staging target owned by WebEngine and supplied to renderer mount",
+    "commit": "staging target is committed into the live boundary only after successful mount and only when that generation is still current",
     "projection": "resolved projection input; renderer must not mutate it or become its authority",
-    "context": "runtime/page/identity/access context supplied by WebEngine; renderer must not treat it as mutable authority",
+    "context": "frozen runtime/page/identity/access context plus projectorId and generation supplied by WebEngine",
     "instanceIsolation": "each mount call is independent even when the same renderer module is mounted multiple times",
     "cleanupRule": "cleanup is bound to the mount result of one mount call; module-global destroy state is not canonical"
   },
   "boundaryLifecycle": {
     "carrier": ".we-projector[data-state]",
     "values": {
-      "loading": "WebEngine is resolving, authorizing or mounting this projection generation and no terminal presentation state has been reached yet",
-      "ready": "the current projection generation mounted successfully and has presentable output",
-      "empty": "the current projection generation completed successfully but has no presentable output",
-      "denied": "presentation was denied by the authorization/preflight path; renderer mount is not invoked for the denied generation",
-      "error": "the current projection generation failed during resolution, loading or mount; the failure is isolated to this projector boundary",
-      "destroy": "the current mount generation is being torn down and is terminal for that generation"
+      "loading": "WebEngine is loading or mounting the current projection generation",
+      "ready": "the current generation mounted successfully and its staging target was committed with presentable output",
+      "empty": "the current generation mounted successfully and its staging target was committed with no presentable output",
+      "denied": "presentation was denied by authorization/preflight orchestration and no renderer mount is invoked for that generation",
+      "error": "the current generation failed during renderer load or mount; the failure is isolated to this projector boundary",
+      "destroy": "the previous/current generation has been invalidated and is being or has been torn down"
     },
     "allowedTransitions": [
       "new -> loading",
@@ -64,44 +84,45 @@
     "rules": [
       "ready and empty are the only lifecycle outcomes a successful renderer mount may report",
       "denied is owned by WebEngine authorization orchestration and is never returned by a renderer",
-      "error is produced by orchestration when an operation fails and is never used as a renderer success result",
-      "destroy is terminal for one mount generation even when the DOM boundary is later reused by a new generation",
+      "error is produced by orchestration and is never used as a renderer success result",
+      "destroy is terminal for one mount generation even when the boundary is later reused",
       "presentation state does not grant or revoke authorization",
-      "destroy -> loading is allowed only when the same DOM boundary is reused for a distinct new generation"
+      "destroy -> loading is allowed only for a distinct new generation"
     ]
+  },
+  "asyncAndRaceSafety": {
+    "generationRule": "each mount attempt receives a monotonic boundary-local generation id",
+    "stagingRule": "renderer writes occur against a generation-isolated staging target rather than the live boundary",
+    "lateCompletionRule": "a superseded async generation is never committed into the live boundary",
+    "lateHandleRule": "if a superseded mount later resolves with a destroy handle, WebEngine invokes that handle exactly once",
+    "cancellationRule": "lifecycle correctness does not depend on renderer cancellation cooperation"
   },
   "destroySemantics": {
     "when": [
       "projection is replaced",
-      "projector boundary is unmounted",
+      "projector boundary is explicitly destroyed",
+      "presentation becomes denied",
       "page/surface owning the projection is destroyed",
-      "a superseded async mount resolves after a newer generation became current"
+      "a superseded async mount later resolves"
     ],
     "ordering": [
-      "mark the old generation as destroy",
-      "prevent the old generation from publishing further lifecycle state",
-      "invoke its returned destroy handle exactly once when present",
-      "remove or replace renderer-owned DOM within the mount target",
-      "release WebEngine references to the old generation"
+      "publish destroy for the old live generation when applicable",
+      "mark the old generation inactive so it cannot publish lifecycle state",
+      "remove renderer-owned live DOM from the boundary",
+      "invoke the returned mount-instance destroy handle exactly once when available",
+      "allow a distinct new generation to enter loading"
     ],
-    "failureRule": "destroy failure must be contained to the old mount generation and must not resurrect or authorize it"
-  },
-  "asyncAndRaceSafety": {
-    "generationRule": "each mount attempt has a distinct generation identity owned by WebEngine",
-    "lateCompletionRule": "a superseded async mount must not overwrite DOM or lifecycle state belonging to a newer generation",
-    "lateHandleRule": "if a superseded mount later resolves with a destroy handle, WebEngine invokes that handle instead of publishing the stale result",
-    "cancellationRule": "WebEngine may provide cancellation context such as an AbortSignal, but lifecycle correctness must not depend solely on renderer cooperation"
+    "failureRule": "destroy failure is reported diagnostically but contained to the old generation and cannot block or authorize a replacement generation"
   },
   "failureIsolation": {
-    "mountFailure": "WebEngine catches renderer load/mount failure, contains it to the projector boundary and enters error",
-    "partialSideEffects": "if mount throws before returning a cleanup handle, the renderer is responsible for cleaning side effects it created outside the target; mutations inside the target may be discarded by WebEngine",
-    "diagnostics": "sensitive or verbose failure details must not be encoded into shared presentation attributes"
+    "loadOrMountFailure": "current generation enters error and live renderer DOM is cleared",
+    "staleFailure": "failure from an obsolete generation cannot publish error over the current generation",
+    "diagnostics": "verbose failure details are emitted only through an optional diagnostic callback, never through shared presentation attributes"
   },
   "rules": [
     "renderers are executable implementations outside the projector tree",
     "a renderer may use WebGUI, S3D or native browser capabilities",
     "a renderer does not become the authority for domain data, authorization, SiteTree or Actions",
-    "a renderer override must be explicit because the default path is derived",
     "the same renderer module may be mounted concurrently in multiple independent projection instances",
     "a module-global destroy() that cannot identify a mount instance is not the canonical cleanup model",
     "WebEngine owns lifecycle orchestration and state publication",
