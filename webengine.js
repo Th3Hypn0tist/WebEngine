@@ -23,7 +23,20 @@ import {
   projectActiveNavigationState,
 } from './core/site-tree-projections.js';
 
-const WEBENGINE_VERSION = '0.3.0';
+import {
+  CONTENT_TYPES,
+  validateContentRecord,
+  freezeContentRecord,
+  assertProviderRelativeResource,
+  assertResolvedUrl,
+  createContentProviderRegistry,
+  createInlineTextProvider,
+  createAssetProvider,
+  createEmbedProvider,
+  resolveContent,
+} from './core/content.js';
+
+const WEBENGINE_VERSION = '0.4.0';
 
 export {
   WEBENGINE_VERSION,
@@ -43,4 +56,14 @@ export {
   projectSitemap,
   resolveCurrentSection,
   projectActiveNavigationState,
+  CONTENT_TYPES,
+  validateContentRecord,
+  freezeContentRecord,
+  assertProviderRelativeResource,
+  assertResolvedUrl,
+  createContentProviderRegistry,
+  createInlineTextProvider,
+  createAssetProvider,
+  createEmbedProvider,
+  resolveContent,
 };
