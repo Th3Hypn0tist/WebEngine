@@ -120,6 +120,33 @@ derived projection mechanisms
 
 The AIGM.fi instance owns the actual `/site.json` data.
 
+
+
+## SiteTree runtime API
+
+WebEngine exposes a small deterministic SiteTree runtime:
+
+```js
+loadSiteTree()
+parseSiteTree(source)
+validateSiteTree(root)
+createSiteTreeIndex(root)
+resolveSiteNodeById(siteTree, id)
+resolveSiteNodeByPath(siteTree, path)
+```
+
+Default loader target:
+
+```text
+/site.json
+```
+
+The runtime does not normalize or repair hierarchy identity. IDs and public paths resolve exactly as declared. Invalid JSON, invalid node shape, duplicate IDs, duplicate paths, cycles and fetch failures reject instead of creating fallback hierarchy.
+
+`createSiteTreeIndex()` creates an isolated frozen snapshot so later mutation of the source object cannot mutate the runtime hierarchy.
+
+This step implements SiteTree loading, parsing, validation, indexing and exact resolution only. Navigation, breadcrumbs and other SiteTree projections remain a separate layer.
+
 ## Presentation contract
 
 WebEngine owns the semantic meaning of the shared application/composition namespace:
