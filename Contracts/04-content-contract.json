@@ -48,7 +48,8 @@
     "embed providers such as youtube are handled by provider-specific resolvers",
     "asset/embed provider resource identifiers are relative to their provider namespace",
     "absolute filesystem paths, absolute resource URLs in canonical content identifiers, backslash paths and parent/current-directory traversal are forbidden",
-    "embed providers return structured descriptors and never authoritative HTML or iframe payloads"
+    "embed providers return structured descriptors and never authoritative HTML or iframe payloads",
+    "resolved asset/embed URLs exposed by WebEngine must be root-relative or use http(s); javascript:, data:, file:, blob: and protocol-relative URLs are rejected"
   ],
   "resolvedTypes": {
     "text": {
@@ -83,6 +84,7 @@
     "validateContentRecord(record)",
     "freezeContentRecord(record)",
     "createContentProviderRegistry()",
+    "assertResolvedUrl(value)",
     "createInlineTextProvider()",
     "createAssetProvider(baseUrl)",
     "createEmbedProvider(resolveResource)",
