@@ -36,7 +36,16 @@ import {
   resolveContent,
 } from './core/content.js';
 
-const WEBENGINE_VERSION = '0.4.0';
+import {
+  validateProjectorDefinition,
+  parseProjectorDefinition,
+  mergeProjectorDelta,
+  loadProjectorDefinition,
+  createProjectorResolutionContext,
+  resolveProjector,
+} from './core/projector-resolver.js';
+
+const WEBENGINE_VERSION = '0.5.0';
 
 export {
   WEBENGINE_VERSION,
@@ -66,4 +75,10 @@ export {
   createAssetProvider,
   createEmbedProvider,
   resolveContent,
+  validateProjectorDefinition,
+  parseProjectorDefinition,
+  mergeProjectorDelta,
+  loadProjectorDefinition,
+  createProjectorResolutionContext,
+  resolveProjector,
 };

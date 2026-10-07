@@ -1,4 +1,7 @@
 {
+  "name": "Projector",
+  "version": "0.2.0",
+  "owner": "WebEngine",
   "idGrammar": "DOMAIN:PROJECTOR[:VARIANT...]",
   "baseResolution": {
     "example": "LMTS:ranking",
@@ -12,12 +15,59 @@
       "/app/lmts/projectors/ranking.json",
       "/app/lmts/projectors/ranking/top3.json"
     ],
-    "rule": "variant definitions are declarative deltas applied after their parent definitions"
+    "rule": "variant definitions are declarative deltas applied in canonical parent-to-child order"
+  },
+  "definition": {
+    "shape": "JSON object",
+    "declarativeOnly": true,
+    "forbiddenTopLevelDerivableFields": [
+      "id",
+      "domain",
+      "entry"
+    ],
+    "forbiddenKeys": [
+      "__proto__",
+      "prototype",
+      "constructor"
+    ],
+    "defaultMaxStructureDepth": 64
+  },
+  "mergeSemantics": {
+    "objects": "plain objects merge recursively",
+    "arrays": "replace the parent value",
+    "scalars": "replace the parent value",
+    "null": "replaces the parent value with null",
+    "deletionOperator": "none",
+    "expressions": "none",
+    "rule": "projector JSON remains declarative data and does not acquire a programming-language operator model"
+  },
+  "runtime": {
+    "loader": "loadProjectorDefinition(url)",
+    "resolver": "resolveProjector(id, options)",
+    "result": {
+      "id": "canonical projector id supplied by the caller",
+      "definitionUrls": "immutable canonical base+variant definition chain",
+      "projection": "deep-frozen merged declarative projection"
+    },
+    "failure": "any missing, invalid or non-declarative definition fails closed; partial merged projections are not returned"
+  },
+  "recursionSafety": {
+    "context": "createProjectorResolutionContext({ maxDepth })",
+    "defaultMaxDepth": 32,
+    "cycle": "re-entering the same canonical projector id in one active resolution context fails",
+    "depth": "nested projector resolution beyond maxDepth fails",
+    "unwind": "resolution context is unwound in finally semantics after success or failure",
+    "futureCompositionBinding": "recursive/nested projector composition must reuse the active resolution context"
   },
   "rules": [
     "projector definitions contain data, not executable code",
-    "the domain and projector path are derived from the projector id",
-    "do not store an entry path when it can be derived from the id",
-    "the same projector may be composed into any number of pages or surfaces"
+    "the domain and projector definition paths are derived from the projector id",
+    "do not store id, domain or entry when they are deterministically derivable from the canonical projector id",
+    "variant definitions contain only declarative deltas from their parent/base projector",
+    "the same projector may be composed into any number of pages or surfaces",
+    "projector resolution does not execute domain behavior",
+    "projector resolution does not grant authorization",
+    "projector resolution has no implicit fallback definition",
+    "projector resolution does not cache subject-specific protected projection data"
   ]
 }
