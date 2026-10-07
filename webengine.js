@@ -78,7 +78,6 @@ export {
   validateProjectorDefinition,
   parseProjectorDefinition,
   mergeProjectorDelta,
-  deepFreezeDeclarative,
   loadProjectorDefinition,
   createProjectorResolutionContext,
   resolveProjector,
