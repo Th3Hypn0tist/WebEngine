@@ -108,8 +108,18 @@ The generic browser-side consumer boundary is:
 
 ```js
 createDwhAdapter({ project })
+createHttpDwhAdapter({ endpoint })
 projectDwhSymbol(adapter, symbol, context)
 ```
+
+For the current PHP DWH profile:
+
+```text
+/test/app/dwh/api/project.php   test deployment
+/app/dwh/api/project.php        production after cutover
+```
+
+Transport does not define symbol semantics; the same adapter carries `#SITE`, `#METAMODULE:CATALOG` and later contracted symbols.
 
 A DWH projection response identifies the symbol it satisfies and carries the projected data. Symbol mismatch or dependency failure is an error; WebEngine does not invent a second canonical source.
 
@@ -127,6 +137,8 @@ Authority flow:
 DWH entities + relations
         ↓
       #SITE
+        ↓
+generic DWH projection API
         ↓
 WebEngine validates projection
         ↓
@@ -374,6 +386,6 @@ Authority flows into WebEngine. Canonical authority does not flow back out of We
 
 This README and the machine-readable contracts define the target WebEngine architecture used for implementation and external evaluation.
 
-The current runtime is being migrated to this boundary. Existing helpers that still derive declarations from physical files are implementation debt to be removed in the code phase; they do not override this contract.
+The DWH consumer boundary, HTTP adapter, #SITE consumer and #METAMODULE:CATALOG consumer are implemented. Remaining Content/Action/composition migration continues over the same projection boundary.
 
 See `Contracts/` for the machine-readable responsibility and interface boundaries.
