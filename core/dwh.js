@@ -6,6 +6,29 @@ function assertDwhSymbol(symbol) {
   }
 }
 
+function normalizeDwhProjectionEnvelope(value, expectedSymbol = null) {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('DWH projection must be an object');
+  }
+
+  const { symbol, data } = value;
+  assertDwhSymbol(symbol);
+
+  if (expectedSymbol != null && symbol !== expectedSymbol) {
+    throw new Error(`DWH projection symbol mismatch: expected ${expectedSymbol}, got ${symbol}`);
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(value, 'data')) {
+    throw new Error('DWH projection must contain data');
+  }
+
+  const envelope = { symbol, data };
+  if (value.revision != null) envelope.revision = value.revision;
+  if (value.generated_at != null) envelope.generated_at = value.generated_at;
+
+  return Object.freeze(envelope);
+}
+
 function createDwhAdapter({ project }) {
   if (typeof project !== 'function') {
     throw new TypeError('DWH adapter requires a project(symbol, context) function');
@@ -14,7 +37,8 @@ function createDwhAdapter({ project }) {
   return Object.freeze({
     async project(symbol, context = Object.freeze({})) {
       assertDwhSymbol(symbol);
-      return project(symbol, context);
+      const value = await project(symbol, context);
+      return normalizeDwhProjectionEnvelope(value, symbol);
     },
   });
 }
@@ -31,6 +55,7 @@ async function projectDwhSymbol(adapter, symbol, context = Object.freeze({})) {
 export {
   DWH_SYMBOL_PATTERN,
   assertDwhSymbol,
+  normalizeDwhProjectionEnvelope,
   createDwhAdapter,
   projectDwhSymbol,
 };
