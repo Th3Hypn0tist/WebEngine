@@ -1,6 +1,6 @@
 {
   "name": "Actions",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "owner": "DWH (action declaration authority) / WebEngine (runtime binding)",
   "purpose": "consume canonical DWH action declarations and bind presented user intent to external domain action execution",
   "owns": [
@@ -21,6 +21,8 @@
     ]
   },
   "runtimeApi": [
+    "actionIdToDwhSymbol(domain, id)",
+    "loadActionDeclaration(options)",
     "parseActionRef(action)",
     "validateActionRecord(record)",
     "freezeActionRecord(record)",
@@ -59,5 +61,13 @@
       "control binding",
       "executor invocation orchestration"
     ]
+  },
+  "dwhProjection": {
+    "symbolGrammar": "#ACTION:<DOMAIN>:<ID>",
+    "consumerApi": [
+      "actionIdToDwhSymbol(domain, id)",
+      "loadActionDeclaration({ dwh, domain, id, context })"
+    ],
+    "rule": "canonical action declaration is loaded from DWH; WebEngine only binds/executes through an external domain executor"
   }
 }
