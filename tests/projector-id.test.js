@@ -3,60 +3,28 @@ import assert from 'node:assert/strict';
 
 import {
   parseProjectorId,
-  resolveProjectorDefinitionUrls,
-  resolveDefaultRendererUrl,
+  projectorIdToDwhSymbol,
 } from '../webengine.js';
 
-test('resolves base projector', () => {
-  assert.deepEqual(
-    resolveProjectorDefinitionUrls('LMTS:ranking'),
-    ['/app/lmts/projectors/ranking.json'],
-  );
-  assert.equal(
-    resolveDefaultRendererUrl('LMTS:ranking'),
-    '/app/lmts/renderers/ranking.js',
-  );
-});
+test('parses canonical projector identity without rewriting it', () => {
+  const parsed = parseProjectorId('AIGMos:Overview:Compact');
 
-test('resolves nested declarative variants', () => {
-  assert.deepEqual(
-    resolveProjectorDefinitionUrls('LMTS:ranking:top3'),
-    [
-      '/app/lmts/projectors/ranking.json',
-      '/app/lmts/projectors/ranking/top3.json',
-    ],
-  );
-});
-
-test('keeps canonical id while deriving lowercase paths', () => {
-  const parsed = parseProjectorId('AIGMos:Overview');
+  assert.equal(parsed.id, 'AIGMos:Overview:Compact');
   assert.equal(parsed.domain, 'AIGMos');
+  assert.equal(parsed.projector, 'Overview');
+  assert.deepEqual(parsed.variants, ['Compact']);
   assert.equal(parsed.pathDomain, 'aigmos');
-  assert.equal(parsed.pathProjector, 'overview');
 });
 
-test('rejects malformed ids', () => {
+test('maps projector identity to a case-preserving DWH symbol', () => {
+  assert.equal(
+    projectorIdToDwhSymbol('LMTS:ranking:top3'),
+    '#PROJECTOR:LMTS:ranking:top3',
+  );
+});
+
+test('rejects malformed projector ids', () => {
   assert.throws(() => parseProjectorId('ranking'));
   assert.throws(() => parseProjectorId('LMTS:ranking:'));
   assert.throws(() => parseProjectorId('LMTS:rank ing'));
-});
-
-
-test('projects projector and renderer paths through a relocatable instance root', () => {
-  assert.deepEqual(
-    resolveProjectorDefinitionUrls('LMTS:ranking:top3', {
-      instanceRoot: '/test/',
-    }),
-    [
-      '/test/app/lmts/projectors/ranking.json',
-      '/test/app/lmts/projectors/ranking/top3.json',
-    ],
-  );
-
-  assert.equal(
-    resolveDefaultRendererUrl('LMTS:ranking', {
-      instanceRoot: '/test/',
-    }),
-    '/test/app/lmts/renderers/ranking.js',
-  );
 });
