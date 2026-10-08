@@ -43,6 +43,43 @@ function createDwhAdapter({ project }) {
   });
 }
 
+function createHttpDwhAdapter({
+  endpoint,
+  fetchImpl = globalThis.fetch,
+} = {}) {
+  if (typeof endpoint !== 'string' || !endpoint.trim()) {
+    throw new TypeError('HTTP DWH adapter requires a non-empty endpoint');
+  }
+  if (typeof fetchImpl !== 'function') {
+    throw new TypeError('HTTP DWH adapter requires fetch implementation');
+  }
+
+  return createDwhAdapter({
+    async project(symbol, context = Object.freeze({})) {
+      const response = await fetchImpl(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({ symbol, context }),
+      });
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        // handled below
+      }
+
+      if (!response.ok) {
+        const code = payload?.error ?? 'unknown_error';
+        throw new Error(`DWH projection failed: HTTP ${response.status} ${code}`);
+      }
+
+      return payload;
+    },
+  });
+}
+
 async function projectDwhSymbol(adapter, symbol, context = Object.freeze({})) {
   if (!adapter || typeof adapter.project !== 'function') {
     throw new TypeError('expected a DWH adapter created by createDwhAdapter');
@@ -57,5 +94,6 @@ export {
   assertDwhSymbol,
   normalizeDwhProjectionEnvelope,
   createDwhAdapter,
+  createHttpDwhAdapter,
   projectDwhSymbol,
 };
