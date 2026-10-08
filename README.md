@@ -441,6 +441,74 @@ Embeds remain structured descriptors. Providers cannot return authoritative HTML
 
 This runtime step does not choose a Content persistence backend and does not implement projector loading.
 
+
+
+## Shell, page composition and Actions
+
+WebEngine composes a shared shell directly from canonical SiteTree projections:
+
+```js
+createPageContext(siteTree, currentPath)
+createWebEngineShell({ document, siteTree, currentPath, title })
+createProjectorSlot(composition, resolvedProjector, options)
+mountProjectorSlot(slot, resolvedProjector, context, options)
+composeProjector(composition, resolvedProjector, context, options)
+destroyWebEngineComposition(composition, options)
+```
+
+The page context contains detached derived values only:
+
+```text
+currentPath
+currentNode
+currentSection
+globalNavigation
+localNavigation
+breadcrumbs
+activeNavigation
+```
+
+The shell emits the existing public WebEngine presentation semantics:
+
+```text
+.we-shell
+.we-header
+.we-main
+.we-page
+.we-nav
+.we-nav-item
+.we-section
+.we-projector-header
+.we-projector
+```
+
+Navigation DOM is not a separate public authority. Shell navigation is built from SiteTree-derived Navigation projections, and unaddressable structural nodes never receive invented links.
+
+Projector slots bind one resolved projector identity to one renderer boundary. Renderer lifecycle remains owned by the renderer subsystem, and one projector failure is isolated to that slot.
+
+Actions remain separate from Navigation and Content:
+
+```js
+parseActionRef(action)
+validateActionRecord(record)
+freezeActionRecord(record)
+createActionRegistry()
+executeAction(record, executor, options)
+bindActionControl(control, record, executor, options)
+```
+
+Canonical Action record:
+
+```text
+id
+label
+action = DOMAIN:ACTION
+```
+
+WebEngine owns action identity, label and binding of user intent to an external action reference. The supplied executor owns the actual domain behavior. UI visibility, labels, listeners or disabled state never grant authorization.
+
+IAM identity and AccessCore authorization adapters are intentionally not implemented by this composition step.
+
 ## Identity and authorization
 
 IAM answers **who** the subject is.
