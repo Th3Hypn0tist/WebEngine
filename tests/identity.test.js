@@ -200,3 +200,19 @@ test('rejects malformed successful IAM responses instead of inventing identity',
     /invalid IAM identity response|IAM identity/,
   );
 });
+
+
+test('loads IAM identity from the active instance root', async () => {
+  const calls = [];
+
+  await loadIAMIdentityContext({
+    domain: 'lmts',
+    instanceRoot: '/test/',
+    fetch: async (url, options) => {
+      calls.push([url, options]);
+      return response(iamPayload());
+    },
+  });
+
+  assert.equal(calls[0][0], '/test/iam/api/me.php?domain=lmts');
+});
