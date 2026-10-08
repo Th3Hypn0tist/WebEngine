@@ -39,7 +39,7 @@ Canonical site/domain data remains deployment-neutral:
 /lmts/
 /app/lmts/projectors/ranking.json
 /app/lmts/renderers/ranking.js
-/iam/api/me.php
+/app/iam/api/me.php
 ```
 
 At runtime those logical paths are projected through the active instance root.
@@ -55,8 +55,10 @@ Example test deployment:
 │   └── s3d/
 ├── style/
 ├── app/
-├── iam/
-└── lmts/
+│   ├── iam/
+│   └── lmts/
+├── iam/    # public projection
+└── lmts/   # public projection
 ```
 
 The exact same canonical data under production root becomes:
@@ -67,8 +69,10 @@ The exact same canonical data under production root becomes:
 ├── lib/
 ├── style/
 ├── app/
-├── iam/
-└── lmts/
+│   ├── iam/
+│   └── lmts/
+├── iam/    # public projection
+└── lmts/   # public projection
 ```
 
 No `/test` literal belongs in SiteTree, projector definitions, renderer paths, Content identities or domain code.
