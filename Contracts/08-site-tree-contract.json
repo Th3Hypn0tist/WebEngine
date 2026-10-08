@@ -1,6 +1,6 @@
 {
   "name": "SiteTree",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "owner": "WebEngine",
   "kind": "DWH SiteTree projection consumer mechanism",
   "canonicalSource": {
@@ -37,7 +37,13 @@
   "loader": {
     "defaultSymbol": "#SITE",
     "input": "DWH adapter implementing project(symbol, context)",
-    "failure": "DWH adapter, envelope or SiteTree validation failure rejects; no file fallback or invented hierarchy"
+    "failure": "DWH adapter, envelope or SiteTree validation failure rejects; no file fallback or invented hierarchy",
+    "http": {
+      "adapter": "createHttpDwhAdapter({ endpoint })",
+      "testEndpoint": "/test/app/dwh/api/project.php",
+      "productionEndpoint": "/app/dwh/api/project.php",
+      "request": "POST { symbol: '#SITE', context }"
+    }
   },
   "derivedProjections": [
     "global navigation",
@@ -59,6 +65,7 @@
     "public means exposed or addressable and does not imply anonymous access",
     "API and service routing remain separate machine-interface concerns",
     "SiteTree must not infer authorization from hierarchy, paths or visibility",
-    "SiteTree node paths remain logical root paths and do not embed the active deployment prefix"
+    "SiteTree node paths remain logical root paths and do not embed the active deployment prefix",
+    "HTTP transport is replaceable consumer plumbing and does not become SiteTree authority"
   ]
 }
