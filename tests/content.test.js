@@ -11,7 +11,10 @@ import {
   createInlineTextProvider,
   createAssetProvider,
   createEmbedProvider,
+  contentIdToDwhSymbol,
+  loadContentDeclaration,
   resolveContent,
+  createDwhAdapter,
 } from '../webengine.js';
 
 const record = overrides => ({
@@ -291,4 +294,48 @@ test('root-relative Content asset providers follow the active instance root', as
   );
 
   assert.equal(result.url, '/test/assets/brand/logo.svg');
+});
+
+
+test('maps Content identity to exact DWH symbol', () => {
+  assert.equal(contentIdToDwhSymbol('site', 'hero'), '#CONTENT:site:hero');
+  assert.throws(() => contentIdToDwhSymbol('bad domain', 'hero'));
+});
+
+test('loads canonical Content declaration from DWH', async () => {
+  const calls = [];
+  const dwh = createDwhAdapter({
+    project: async (symbol, context) => {
+      calls.push({ symbol, context });
+      return { symbol, data: record() };
+    },
+  });
+
+  const result = await loadContentDeclaration({
+    dwh,
+    domain: 'site',
+    id: 'hero',
+    context: { page: '/' },
+  });
+
+  assert.deepEqual(calls, [{
+    symbol: '#CONTENT:site:hero',
+    context: { page: '/' },
+  }]);
+  assert.deepEqual(result, record());
+  assert.ok(Object.isFrozen(result));
+});
+
+test('Content declaration fails closed on symbol/record mismatch', async () => {
+  const dwh = createDwhAdapter({
+    project: async symbol => ({
+      symbol,
+      data: record({ id: 'other' }),
+    }),
+  });
+
+  await assert.rejects(
+    () => loadContentDeclaration({ dwh, domain: 'site', id: 'hero' }),
+    /identity mismatch/,
+  );
 });
