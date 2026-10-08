@@ -21,7 +21,16 @@ import {
   destroyRendererBoundary,
 } from './renderer.js';
 
+import {
+  projectDwhSymbol,
+} from './dwh.js';
+
+import {
+  resolveProjector,
+} from './projector-resolver.js';
+
 const COMPOSITION_STATE = new WeakMap();
+const WEB_SYMBOL = '#WEB';
 
 function assertDocument(document) {
   if (!document || typeof document.createElement !== 'function') {
@@ -88,6 +97,231 @@ function createPageContext(
     activeNavigation: projectActiveNavigationState(siteTree, logicalPath),
   });
 }
+
+
+function validateWebPageProjection(value) {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('#WEB projection must be an object');
+  }
+
+  const keys = new Set(Object.keys(value));
+  for (const required of ['page', 'children', 'placements']) {
+    if (!keys.has(required)) {
+      throw new Error(`#WEB projection missing required field: ${required}`);
+    }
+  }
+  for (const key of keys) {
+    if (!['page', 'children', 'placements'].includes(key)) {
+      throw new Error(`unknown #WEB projection field: ${key}`);
+    }
+  }
+
+  const page = value.page;
+  if (page == null || typeof page !== 'object' || Array.isArray(page)) {
+    throw new TypeError('#WEB page must be an object');
+  }
+
+  const pageKeys = new Set(Object.keys(page));
+  for (const required of ['id', 'title', 'menuitem', 'description']) {
+    if (!pageKeys.has(required)) {
+      throw new Error(`#WEB page missing required field: ${required}`);
+    }
+  }
+  for (const key of pageKeys) {
+    if (!['id', 'title', 'menuitem', 'description'].includes(key)) {
+      throw new Error(`unknown #WEB page field: ${key}`);
+    }
+  }
+
+  if (typeof page.id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(page.id)) {
+    throw new Error('#WEB page id is invalid');
+  }
+  for (const field of ['title', 'menuitem', 'description']) {
+    if (typeof page[field] !== 'string') {
+      throw new TypeError(`#WEB page ${field} must be a string`);
+    }
+  }
+  if (!page.title || page.title !== page.title.trim()) {
+    throw new Error('#WEB page title must be non-empty and trimmed');
+  }
+  if (!page.menuitem || page.menuitem !== page.menuitem.trim()) {
+    throw new Error('#WEB page menuitem must be non-empty and trimmed');
+  }
+
+  if (!Array.isArray(value.children) || !Array.isArray(value.placements)) {
+    throw new TypeError('#WEB children and placements must be arrays');
+  }
+
+  let previousOrder = -1;
+  const placementIds = new Set();
+
+  for (const placement of value.placements) {
+    if (placement == null || typeof placement !== 'object' || Array.isArray(placement)) {
+      throw new TypeError('#WEB placement must be an object');
+    }
+
+    const placementKeys = new Set(Object.keys(placement));
+    for (const required of ['id', 'kind', 'order', 'ref', 'title']) {
+      if (!placementKeys.has(required)) {
+        throw new Error(`#WEB placement missing required field: ${required}`);
+      }
+    }
+    for (const key of placementKeys) {
+      if (!['id', 'kind', 'order', 'ref', 'title'].includes(key)) {
+        throw new Error(`unknown #WEB placement field: ${key}`);
+      }
+    }
+
+    if (typeof placement.id !== 'string' || !placement.id) {
+      throw new Error('#WEB placement id must be non-empty');
+    }
+    if (placementIds.has(placement.id)) {
+      throw new Error(`duplicate #WEB placement id: ${placement.id}`);
+    }
+    placementIds.add(placement.id);
+
+    if (placement.kind !== 'projector') {
+      throw new Error(`unsupported #WEB placement kind: ${placement.kind}`);
+    }
+    if (!Number.isInteger(placement.order) || placement.order < 0) {
+      throw new Error('#WEB placement order must be a non-negative integer');
+    }
+    if (placement.order <= previousOrder) {
+      throw new Error('#WEB placements must be strictly ordered');
+    }
+    previousOrder = placement.order;
+
+    if (typeof placement.ref !== 'string' || !placement.ref) {
+      throw new Error('#WEB placement ref must be non-empty');
+    }
+    if (placement.title != null && (
+      typeof placement.title !== 'string' ||
+      !placement.title.trim() ||
+      placement.title !== placement.title.trim()
+    )) {
+      throw new Error('#WEB placement title must be null or a trimmed non-empty string');
+    }
+  }
+
+  return true;
+}
+
+function freezeWebPageProjection(value) {
+  validateWebPageProjection(value);
+
+  const page = Object.freeze({ ...value.page });
+  const children = Object.freeze(value.children.map(child => Object.freeze({ ...child })));
+  const placements = Object.freeze(value.placements.map(placement => Object.freeze({ ...placement })));
+
+  return Object.freeze({
+    page,
+    children,
+    placements,
+  });
+}
+
+async function loadWebPage({
+  dwh,
+  path,
+  context = Object.freeze({}),
+} = {}) {
+  if (typeof path !== 'string' || !path.startsWith('/')) {
+    throw new TypeError('#WEB path must be an absolute logical public path');
+  }
+
+  const envelope = await projectDwhSymbol(
+    dwh,
+    WEB_SYMBOL,
+    Object.freeze({
+      ...(context ?? {}),
+      path,
+    }),
+  );
+
+  return Object.freeze({
+    symbol: envelope.symbol,
+    data: freezeWebPageProjection(envelope.data),
+    revision: envelope.revision ?? null,
+    generated_at: envelope.generated_at ?? null,
+  });
+}
+
+async function composeWebPage({
+  document = globalThis.document,
+  dwh,
+  siteTree,
+  currentPath,
+  instanceRoot = INSTANCE_ROOT_PATH,
+  dwhContext = Object.freeze({}),
+  rendererContext = Object.freeze({}),
+  rendererOptions = Object.freeze({}),
+} = {}) {
+  const pageContext = createPageContext(siteTree, currentPath, { instanceRoot });
+  if (!pageContext.currentNode) {
+    throw new Error('cannot compose #WEB page for unknown SiteTree path');
+  }
+
+  const pageProjection = await loadWebPage({
+    dwh,
+    path: pageContext.currentPath,
+    context: dwhContext,
+  });
+
+  if (pageProjection.data.page.id !== pageContext.currentNode.id) {
+    throw new Error(
+      `#WEB/#SITE page identity mismatch: ${pageProjection.data.page.id} != ${pageContext.currentNode.id}`,
+    );
+  }
+
+  const composition = createWebEngineShell({
+    document,
+    siteTree,
+    currentPath,
+    title: pageProjection.data.page.title,
+    instanceRoot,
+  });
+
+  const placements = [];
+
+  for (const placement of pageProjection.data.placements) {
+    const projector = await resolveProjector(placement.ref, {
+      dwh,
+      dwhContext: Object.freeze({
+        ...(dwhContext ?? {}),
+        page: pageContext.currentPath,
+        placement: placement.id,
+      }),
+    });
+
+    const composed = await composeProjector(
+      composition,
+      projector,
+      Object.freeze({
+        ...(rendererContext ?? {}),
+        page: pageProjection.data.page,
+        placement,
+      }),
+      {
+        title: placement.title,
+        instanceRoot,
+        ...(rendererOptions ?? {}),
+      },
+    );
+
+    placements.push(Object.freeze({
+      placement,
+      projector,
+      result: composed,
+    }));
+  }
+
+  return Object.freeze({
+    composition,
+    pageProjection,
+    placements: Object.freeze(placements),
+  });
+}
+
 
 function createNavigationElement(document, items, {
   currentId = null,
@@ -378,6 +612,11 @@ async function destroyWebEngineComposition(
 }
 
 export {
+  WEB_SYMBOL,
+  validateWebPageProjection,
+  freezeWebPageProjection,
+  loadWebPage,
+  composeWebPage,
   createPageContext,
   createNavigationElement,
   createWebEngineShell,
