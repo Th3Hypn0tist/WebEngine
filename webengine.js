@@ -66,7 +66,6 @@ import {
 
 import {
   createPageContext,
-  createNavigationElement,
   createWebEngineShell,
   createProjectorSlot,
   mountProjectorSlot,
@@ -124,7 +123,6 @@ export {
   executeAction,
   bindActionControl,
   createPageContext,
-  createNavigationElement,
   createWebEngineShell,
   createProjectorSlot,
   mountProjectorSlot,
