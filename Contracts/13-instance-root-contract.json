@@ -1,6 +1,6 @@
 {
   "name": "Relocatable Instance Root",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "WebEngine",
   "purpose": "allow the complete site runtime tree to be deployed under a temporary prefix such as /test/ and later promoted to the domain root without changing canonical site data or domain code",
   "canonicalLogicalRoot": "/",
@@ -12,16 +12,18 @@
   "logicalVsPhysical": {
     "logical": [
       "/site.json",
+      "/app/iam/api/me.php",
       "/app/lmts/projectors/ranking.json",
       "/app/lmts/renderers/ranking.js",
-      "/iam/api/me.php",
+      "/iam/",
       "/lmts/"
     ],
     "physicalTest": [
       "/test/site.json",
+      "/test/app/iam/api/me.php",
       "/test/app/lmts/projectors/ranking.json",
       "/test/app/lmts/renderers/ranking.js",
-      "/test/iam/api/me.php",
+      "/test/iam/",
       "/test/lmts/"
     ],
     "rule": "canonical records and contracts store logical root paths; runtime projects them through the active instance root"
@@ -51,6 +53,7 @@
     "current browser paths are stripped back to logical paths before SiteTree resolution",
     "navigation links are projected back through the active instance root",
     "instance-root projection must not permit path traversal or cross-origin path injection",
-    "existing production surfaces remain untouched until explicit cutover"
+    "existing production surfaces remain untouched until explicit cutover",
+    "IAM and LMTS implementation roots live under /app/iam/ and /app/lmts/; /iam/ and /lmts/ are public projections"
   ]
 }
