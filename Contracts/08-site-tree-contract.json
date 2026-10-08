@@ -1,9 +1,9 @@
 {
   "name": "SiteTree",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "owner": "WebEngine",
   "kind": "public site hierarchy mechanism",
-  "canonicalInstance": "/site.json",
+  "canonicalInstance": "/site.json relative to the active WebEngine instance root",
   "purpose": "provide one human-editable canonical authority for the public site hierarchy and deterministic derived projections",
   "ownership": {
     "WebEngine": [
@@ -15,7 +15,7 @@
       "derived projection mechanisms"
     ],
     "siteInstance": [
-      "/site.json contents",
+      "<instance-root>/site.json contents",
       "AIGM.fi public hierarchy instance data"
     ]
   },
@@ -51,7 +51,7 @@
     "normalization": "resolver does not lowercase, append slashes, remove slashes or otherwise normalize lookup identity"
   },
   "loader": {
-    "default": "/site.json",
+    "default": "<instance-root>/site.json",
     "failure": "load/parse/validation failure rejects; no fallback hierarchy is invented"
   },
   "derivedProjections": [
@@ -64,7 +64,7 @@
     "public site path resolution"
   ],
   "rules": [
-    "/site.json is site instance data and must not live under /lib/webengine/",
+    "site.json is instance data at <instance-root>/site.json and must not live under <instance-root>/lib/webengine/",
     "SiteTree is the only canonical public hierarchy authority",
     "Navigation, breadcrumbs and sitemap are derived from SiteTree",
     "derived projections may be duplicated; hierarchy authority may not",
@@ -72,6 +72,7 @@
     "public topic architecture and technical/runtime ownership are separate layers",
     "API and service routing are separate machine-interface concerns and must not be inferred from SiteTree",
     "invalid or ambiguous SiteTree data must not be repaired by inventing a second hierarchy",
-    "SiteTree must not infer authorization from hierarchy, paths or visibility"
+    "SiteTree must not infer authorization from hierarchy, paths or visibility",
+    "SiteTree node paths remain logical root paths and do not embed the active deployment prefix"
   ]
 }
