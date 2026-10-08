@@ -46,9 +46,14 @@ function createBoundary() {
   return createElement('section', documentRef);
 }
 
-function resolved(id = 'LMTS:ranking', projection = { title: 'Ranking' }) {
+function resolved(
+  id = 'LMTS:ranking',
+  projection = { title: 'Ranking' },
+  renderer = '/app/lmts/renderers/ranking.js',
+) {
   return Object.freeze({
     id,
+    renderer,
     projection: Object.freeze({ ...projection }),
   });
 }
@@ -63,17 +68,22 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
-test('derives the default renderer URL from the base projector id', () => {
+test('requires an explicit same-domain DWH renderer binding', () => {
   assert.equal(
-    resolveRendererModuleUrl('LMTS:ranking:top3'),
+    resolveRendererModuleUrl('LMTS:ranking:top3', {
+      binding: '/app/lmts/renderers/ranking.js',
+    }),
     '/app/lmts/renderers/ranking.js',
   );
-});
 
-test('accepts only explicit same-domain renderer overrides', () => {
+  assert.throws(
+    () => resolveRendererModuleUrl('LMTS:ranking'),
+    /renderer binding must be a non-empty/,
+  );
+
   assert.equal(
     resolveRendererModuleUrl('LMTS:ranking', {
-      override: '/app/lmts/renderers/ranking/compact.js',
+      binding: '/app/lmts/renderers/ranking/compact.js',
     }),
     '/app/lmts/renderers/ranking/compact.js',
   );
@@ -451,6 +461,7 @@ test('renderer resolution stays inside the active instance root', () => {
   assert.equal(
     resolveRendererModuleUrl('LMTS:ranking', {
       instanceRoot: '/test/',
+      binding: '/app/lmts/renderers/ranking.js',
     }),
     '/test/app/lmts/renderers/ranking.js',
   );
@@ -458,7 +469,7 @@ test('renderer resolution stays inside the active instance root', () => {
   assert.equal(
     resolveRendererModuleUrl('LMTS:ranking', {
       instanceRoot: '/test/',
-      override: '/app/lmts/renderers/ranking/compact.js',
+      binding: '/app/lmts/renderers/ranking/compact.js',
     }),
     '/test/app/lmts/renderers/ranking/compact.js',
   );
