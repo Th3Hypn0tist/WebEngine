@@ -1,3 +1,5 @@
+import { projectDwhSymbol } from './dwh.js';
+
 const ACTION_RECORD_KEYS = new Set(['id', 'label', 'action']);
 const SEGMENT = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 const ACTION_REF = /^([A-Za-z0-9][A-Za-z0-9_-]*):([A-Za-z0-9][A-Za-z0-9_-]*)$/;
@@ -82,6 +84,30 @@ function createActionRegistry() {
       return records.get(id) ?? null;
     },
   });
+}
+
+function actionIdToDwhSymbol(domain, id) {
+  assertActionSegment(domain, 'domain');
+  assertActionSegment(id, 'id');
+  return `#ACTION:${domain}:${id}`;
+}
+
+async function loadActionDeclaration({
+  dwh,
+  domain,
+  id,
+  context = Object.freeze({}),
+} = {}) {
+  const symbol = actionIdToDwhSymbol(domain, id);
+  const projection = await projectDwhSymbol(dwh, symbol, context);
+  const canonical = freezeActionRecord(projection.data);
+  const ref = parseActionRef(canonical.action);
+
+  if (canonical.id !== id || ref.domain !== domain) {
+    throw new Error(`Action projection identity mismatch for ${symbol}`);
+  }
+
+  return canonical;
 }
 
 async function executeAction(record, executor, {
@@ -185,6 +211,8 @@ export {
   validateActionRecord,
   freezeActionRecord,
   createActionRegistry,
+  actionIdToDwhSymbol,
+  loadActionDeclaration,
   executeAction,
   bindActionControl,
 };
