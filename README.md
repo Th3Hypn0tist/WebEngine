@@ -509,6 +509,45 @@ WebEngine owns action identity, label and binding of user intent to an external 
 
 IAM identity and AccessCore authorization adapters are intentionally not implemented by this composition step.
 
+
+
+## IAM identity context
+
+IAM remains the identity/authentication/session authority. WebEngine only adapts the current IAM session into immutable runtime context:
+
+```js
+loadIAMIdentityContext({ domain })
+normalizeIAMIdentityPayload(payload, { domain })
+createAnonymousIAMIdentityContext(domain)
+```
+
+Canonical browser endpoint:
+
+```text
+GET /iam/api/me.php?domain=<domain>
+```
+
+Browser session transport uses IAM's Secure/HttpOnly same-origin cookie. Raw IAM bearer/session tokens are not copied into WebEngine context.
+
+Authenticated context:
+
+```text
+authority      = IAM
+authenticated  = true
+domain
+contract       = iam.light
+version        = 1.x
+authLevel      = light
+subject        = { id, username, status, verified }
+managementTier = 3 | 2 | 1 | 1337
+```
+
+`managementTier` is IAM user-management metadata only. It is never converted into application permissions, roles, or AccessCore allow/deny decisions.
+
+HTTP 401 from IAM means anonymous identity. Other IAM/domain failures remain adapter errors rather than being silently reinterpreted as authorization results.
+
+Application authorization remains a separate AccessCore concern.
+
 ## Identity and authorization
 
 IAM answers **who** the subject is.

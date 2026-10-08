@@ -1,6 +1,6 @@
 {
   "name": "WebEngine",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "kind": "shared web application runtime",
   "runtime": "browser",
   "canonicalPublicEntry": "/lib/webengine/webengine.js",
@@ -32,7 +32,9 @@
     "Actions binds user intent to external domain action references without owning business behavior",
     "domain logic remains in the domain",
     "derived paths are not duplicated in contracts",
-    "WebEngine owns presentation semantics while Style owns visual implementation"
+    "WebEngine owns presentation semantics while Style owns visual implementation",
+    "IAM identity context is adapted from IAM authority without copying session credentials into WebEngine",
+    "IAM management tiers remain user-management claims and are never translated into application permissions"
   ],
   "mustNot": [
     "contain LMTS, IAM, Freemarket or other domain business logic",
@@ -45,6 +47,8 @@
     "execute domain business behavior inside the Actions subsystem",
     "store navigation or action semantics as Content",
     "create an independent navigation hierarchy beside SiteTree",
-    "store AIGM.fi site instance data such as /site.json inside /lib/webengine/"
+    "store AIGM.fi site instance data such as /site.json inside /lib/webengine/",
+    "store IAM passwords or raw bearer/session tokens",
+    "interpret IAM management tier as application authorization"
   ]
 }

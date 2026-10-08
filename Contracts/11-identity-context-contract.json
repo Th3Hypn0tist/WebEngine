@@ -1,0 +1,90 @@
+{
+  "name": "IAM Identity Context",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "identityAuthority": "IAM",
+  "verifiedAgainst": {
+    "contract": "iam.light",
+    "version": "1.1",
+    "endpoint": "/iam/api/me.php?domain=<domain>"
+  },
+  "purpose": "adapt authenticated IAM session identity into a small immutable WebEngine runtime context without becoming an identity or authorization authority",
+  "runtimeApi": [
+    "normalizeIAMIdentityPayload(payload, { domain })",
+    "createAnonymousIAMIdentityContext(domain)",
+    "loadIAMIdentityContext(options)"
+  ],
+  "domainContext": {
+    "required": true,
+    "grammar": "canonical lowercase IAM domain id",
+    "rule": "WebEngine does not normalize or infer IAM domain identity"
+  },
+  "sessionTransport": {
+    "browser": "same-origin Secure/HttpOnly IAM session cookie",
+    "fetch": "GET /iam/api/me.php?domain=<domain> with credentials=same-origin and cache=no-store",
+    "rule": "session token is not copied into WebEngine identity context"
+  },
+  "authenticatedContext": {
+    "fields": [
+      "authority=IAM",
+      "authenticated=true",
+      "domain",
+      "contract",
+      "version",
+      "authLevel",
+      "subject",
+      "managementTier"
+    ],
+    "subject": [
+      "id",
+      "username",
+      "status",
+      "verified"
+    ]
+  },
+  "anonymousContext": {
+    "trigger": "IAM current-identity endpoint returns HTTP 401",
+    "fields": [
+      "authority=IAM",
+      "authenticated=false",
+      "domain",
+      "contract=null",
+      "version=null",
+      "authLevel=null",
+      "subject=null",
+      "managementTier=null"
+    ],
+    "rule": "anonymous identity is not equivalent to an AccessCore deny decision"
+  },
+  "managementTier": {
+    "source": "IAM claims.tier",
+    "allowed": [
+      3,
+      2,
+      1,
+      1337
+    ],
+    "meaning": "effective IAM user-management tier for the requested domain",
+    "mustNot": [
+      "be numerically compared by WebEngine",
+      "be translated into application permissions",
+      "be treated as an AccessCore authorization decision"
+    ]
+  },
+  "failure": {
+    "401": "anonymous context",
+    "400": "adapter/domain error",
+    "403": "authenticated session lacks requested IAM domain membership; adapter error, not application authorization result",
+    "5xx": "IAM service failure",
+    "malformedSuccess": "fail closed; do not invent identity"
+  },
+  "rules": [
+    "IAM remains the sole identity/authentication/session authority",
+    "WebEngine may transport and expose normalized IAM identity context only",
+    "WebEngine never stores passwords or raw IAM bearer/session tokens",
+    "identity context is immutable runtime data, not canonical IAM state",
+    "IAM management tiers are user-management claims only",
+    "application permissions belong to AccessCore",
+    "UI identity state is not a backend security boundary"
+  ]
+}
