@@ -27,6 +27,7 @@ import {
   assertDwhSymbol,
   normalizeDwhProjectionEnvelope,
   createDwhAdapter,
+  createHttpDwhAdapter,
   projectDwhSymbol,
 } from './core/dwh.js';
 
@@ -116,7 +117,7 @@ import {
   preflightProjectorAccess,
 } from './core/access.js';
 
-const WEBENGINE_VERSION = '0.13.0';
+const WEBENGINE_VERSION = '0.14.0';
 
 export {
   WEBENGINE_VERSION,
@@ -133,6 +134,7 @@ export {
   assertDwhSymbol,
   normalizeDwhProjectionEnvelope,
   createDwhAdapter,
+  createHttpDwhAdapter,
   projectDwhSymbol,
   METAMODULE_CATALOG_SYMBOL,
   IDENTITY_STATUSES,
