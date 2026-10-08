@@ -1,8 +1,8 @@
-const DWH_SYMBOL_PATTERN = /^#[A-Z][A-Z0-9_:-]*$/;
+const DWH_SYMBOL_PATTERN = /^#[A-Za-z][A-Za-z0-9_:-]*$/;
 
 function assertDwhSymbol(symbol) {
   if (typeof symbol !== 'string' || !DWH_SYMBOL_PATTERN.test(symbol)) {
-    throw new Error('DWH symbol must match #[A-Z][A-Z0-9_:-]*');
+    throw new Error('DWH symbol must match #[A-Za-z][A-Za-z0-9_:-]*');
   }
 }
 
