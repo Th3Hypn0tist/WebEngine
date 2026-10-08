@@ -1,6 +1,6 @@
 {
   "name": "WebEngine",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "kind": "shared web application runtime",
   "runtime": "browser",
   "canonicalPublicEntry": "/lib/webengine/webengine.js",
@@ -18,7 +18,8 @@
     "shared shell and page composition",
     "WebEngine application/composition presentation semantics under the .we-* namespace",
     "IAM identity context integration",
-    "AccessCore authorization integration"
+    "AccessCore authorization integration",
+    "relocatable instance-root path projection"
   ],
   "principles": [
     "one canonical authority per concern",
@@ -34,7 +35,8 @@
     "derived paths are not duplicated in contracts",
     "WebEngine owns presentation semantics while Style owns visual implementation",
     "IAM identity context is adapted from IAM authority without copying session credentials into WebEngine",
-    "IAM management tiers remain user-management claims and are never translated into application permissions"
+    "IAM management tiers remain user-management claims and are never translated into application permissions",
+    "logical site paths are independent of temporary deployment prefixes such as /test/"
   ],
   "mustNot": [
     "contain LMTS, IAM, Freemarket or other domain business logic",
@@ -49,6 +51,7 @@
     "create an independent navigation hierarchy beside SiteTree",
     "store AIGM.fi site instance data such as /site.json inside /lib/webengine/",
     "store IAM passwords or raw bearer/session tokens",
-    "interpret IAM management tier as application authorization"
+    "interpret IAM management tier as application authorization",
+    "hardcode /test or another deployment prefix into canonical domain/site data"
   ]
 }
