@@ -1,6 +1,6 @@
 {
   "name": "WebEngine",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "kind": "shared web application runtime",
   "runtime": "browser",
   "canonicalPublicEntry": "/lib/webengine/webengine.js",
@@ -11,7 +11,8 @@
     "projector resolution and composition",
     "renderer lifecycle orchestration",
     "Content subsystem",
-    "SiteTree contract, parsing, validation, indexing, resolution and derived projections",
+    "DWH symbol projection consumer adapter",
+    "SiteTree projection consumption, validation, indexing, resolution and derived projections",
     "Navigation projection subsystem",
     "Actions declaration and binding subsystem",
     "routing and page context",
@@ -24,7 +25,6 @@
   "principles": [
     "one canonical authority per concern",
     "the same canonical truth may have many projections",
-    "the public site hierarchy exists canonically once as site instance data in /site.json",
     "Navigation, breadcrumbs, sitemap and active navigation state are projections of SiteTree",
     "Content, SiteTree, Navigation projections and Actions remain separate concerns",
     "projectors are declarative definitions",
@@ -36,7 +36,10 @@
     "WebEngine owns presentation semantics while Style owns visual implementation",
     "IAM identity context is adapted from IAM authority without copying session credentials into WebEngine",
     "IAM management tiers remain user-management claims and are never translated into application permissions",
-    "logical site paths are independent of temporary deployment prefixes such as /test/"
+    "logical site paths are independent of temporary deployment prefixes such as /test/",
+    "DWH is the canonical authority for website relation data used by SiteTree",
+    "WebEngine consumes the DWH #SITE symbol and does not know DWH storage or PHP implementation details",
+    "SiteTree navigation, breadcrumbs, sitemap and active state are projections of the validated #SITE runtime snapshot"
   ],
   "mustNot": [
     "contain LMTS, IAM, Freemarket or other domain business logic",
@@ -49,9 +52,11 @@
     "execute domain business behavior inside the Actions subsystem",
     "store navigation or action semantics as Content",
     "create an independent navigation hierarchy beside SiteTree",
-    "store AIGM.fi site instance data such as /site.json inside /lib/webengine/",
     "store IAM passwords or raw bearer/session tokens",
     "interpret IAM management tier as application authorization",
-    "hardcode /test or another deployment prefix into canonical domain/site data"
+    "hardcode /test or another deployment prefix into canonical domain/site data",
+    "treat site.json or another serialized artifact as SiteTree authority",
+    "query DWH database tables or infer DWH relations from storage layout",
+    "duplicate DWH relation semantics inside WebEngine"
   ]
 }
