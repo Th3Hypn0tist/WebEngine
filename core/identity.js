@@ -1,4 +1,9 @@
-const IAM_IDENTITY_ENDPOINT = '/iam/api/me.php';
+import {
+  INSTANCE_ROOT_PATH,
+  resolveInstancePath,
+} from './instance-root.js';
+
+const IAM_IDENTITY_ENDPOINT = '/app/iam/api/me.php';
 const IAM_IDENTITY_CONTRACT = 'iam.light';
 const IAM_IDENTITY_MAJOR_VERSION = '1';
 const IAM_AUTH_LEVEL = 'light';
@@ -159,6 +164,7 @@ async function responseJson(response) {
 async function loadIAMIdentityContext({
   domain,
   endpoint = IAM_IDENTITY_ENDPOINT,
+  instanceRoot = INSTANCE_ROOT_PATH,
   fetch: fetchImpl = globalThis.fetch,
 } = {}) {
   assertIAMDomain(domain);
@@ -168,7 +174,8 @@ async function loadIAMIdentityContext({
     throw new TypeError('IAM identity adapter requires a fetch implementation');
   }
 
-  const url = `${endpoint}?domain=${encodeURIComponent(domain)}`;
+  const physicalEndpoint = resolveInstancePath(endpoint, { instanceRoot });
+  const url = `${physicalEndpoint}?domain=${encodeURIComponent(domain)}`;
 
   const response = await fetchImpl(url, {
     method: 'GET',

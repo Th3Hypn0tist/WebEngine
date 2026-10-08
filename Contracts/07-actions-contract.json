@@ -1,12 +1,11 @@
 {
   "name": "Actions",
-  "version": "0.2.0",
-  "owner": "WebEngine",
-  "purpose": "canonical user-triggered action declarations, presentation metadata and binding to external domain action execution",
+  "version": "0.3.0",
+  "owner": "DWH (action declaration authority) / WebEngine (runtime binding)",
+  "purpose": "consume canonical DWH action declarations and bind presented user intent to external domain action execution",
   "owns": [
-    "action item identity",
-    "action labels",
-    "binding from a presented control to a domain-defined action reference"
+    "runtime binding from presented controls to projected action references",
+    "listener lifecycle and invocation orchestration"
   ],
   "record": {
     "fields": [
@@ -39,13 +38,26 @@
     ]
   },
   "rules": [
-    "actions are not Content",
-    "button/action labels are owned by Actions",
-    "Actions declares and binds user intent but does not own domain business behavior",
+    "action declarations are canonical DWH data",
+    "Actions are not Content or Navigation",
+    "WebEngine binds user intent but does not own domain business behavior",
     "action execution belongs to the owning domain service",
-    "authorization for an action/resource is decided by AccessCore when required",
+    "authorization for an action/resource is decided by AccessCore",
     "presentation visibility is not a security boundary",
     "binding cleanup removes only the listener owned by that binding",
-    "action executor failure does not mutate the canonical Action record"
-  ]
+    "executor failure does not mutate canonical DWH action data"
+  ],
+  "authority": {
+    "DWH": [
+      "action identity",
+      "action label/presentation metadata",
+      "domain action reference declaration",
+      "action placement relations"
+    ],
+    "WebEngine": [
+      "runtime validation",
+      "control binding",
+      "executor invocation orchestration"
+    ]
+  }
 }

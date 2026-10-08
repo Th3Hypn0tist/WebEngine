@@ -1,149 +1,143 @@
 # WebEngine
 
-Shared web application runtime for AIGM.fi.
+Shared browser execution runtime for AIGM.fi.
 
-WebEngine composes public presentation surfaces from declarative projector contracts. It owns shared application behavior such as projector resolution, composition, renderer lifecycle, Content, SiteTree mechanisms, Navigation projections, Actions, routing/page context, shell behavior, IAM identity context and AccessCore authorization integration.
+WebEngine does not own the canonical website structure. DWH owns that declarative authority. WebEngine consumes DWH projections and executes them in the browser.
 
-WebEngine does **not** own domain business logic, visual styling, DOM primitives, spatial primitives, site-specific hierarchy instance data or authorization policy.
-
-## Dependency direction
+## Canonical responsibility split
 
 ```text
-WebGUI ---->
-             WebEngine ----> domain projections
-S3D ----------------------->
-Style --------------------->
+IAM        = who
+AccessCore = authority / may
+DWH        = where / what relates to what
+WebEngine  = execute the declared web structure
+WebGUI     = generic UI primitives
+S3D        = spatial / 3D primitives
 ```
 
-- WebGUI owns DOM/UI primitives.
-- S3D owns spatial/3D primitives.
-- Style owns visual presentation.
-- WebEngine owns shared application runtime behavior.
-- Domain code owns services, APIs, renderers and projector definitions.
+These responsibilities are intentionally non-overlapping.
 
-## Canonical deployment
+## Core role
+
+WebEngine is the runtime/interpreter between canonical declarations and presentation primitives.
 
 ```text
-/lib/webengine/webengine.js
+                 IAM
+                  │ identity
+                  ▼
+DWH ─────────► WebEngine ◄──────── AccessCore
+declarations      │                 authority
+                  │ runtime execution
+             ┌────┴────┐
+             ▼         ▼
+          WebGUI       S3D
 ```
 
-AIGM.fi site hierarchy instance data lives separately:
+WebEngine owns execution semantics, not declarative authority.
+
+## What DWH owns
+
+DWH is the canonical authority for declarative website structure, including:
 
 ```text
-/site.json
+site hierarchy
+content identity and content relations
+projector definitions and bindings
+renderer bindings
+route declarations
+composition graph
+action declarations
+ordering
+semantic symbols and deterministic projections
 ```
 
-`/site.json` is **not** part of the WebEngine library deployment. WebEngine owns the SiteTree contract and runtime mechanisms that parse, validate, index, resolve and project that instance data.
+WebEngine consumes these declarations through semantic DWH projections. It must not duplicate them as a second canonical model.
 
-Domain runtime roots use:
+## What WebEngine owns
+
+WebEngine owns browser runtime behavior:
 
 ```text
-/app/<domain>/
-├── contracts/
-├── services/
-├── api/
-├── renderers/
-└── projectors/
+DWH projection consumption and validation
+runtime page/context construction
+projector execution orchestration
+renderer loading and lifecycle
+runtime Content provider execution
+runtime SiteTree indexing and exact lookup
+runtime Navigation derivation
+runtime Action binding
+composition instance execution
+shared shell runtime
+DOM / WebGUI / S3D orchestration
+IAM identity adapter
+AccessCore decision adapter
+physical instance-root projection
+.we-* runtime/presentation semantics
 ```
 
-Projectors are declarative definitions. Renderers are executable implementations.
-
-## Projector identifiers
+The distinction is deliberate:
 
 ```text
-LMTS:ranking
--> /app/lmts/projectors/ranking.json
-
-LMTS:ranking:top3
--> /app/lmts/projectors/ranking/top3.json
+DWH       = declare
+WebEngine = execute
 ```
 
-The default renderer for both is derived from the base projector:
+## DWH consumer boundary
+
+WebEngine addresses DWH by semantic symbol, never by database schema.
 
 ```text
-/app/lmts/renderers/ranking.js
+WebEngine
+    ↓ project(symbol, context)
+DWH projection interface
+    ↓
+canonical DWH entities + relations
 ```
 
-A variant defines only the delta from its parent projection.
+WebEngine must not know:
 
+```text
+DWH SQL tables
+PHP class layout
+physical DWH storage backend
+relation-table implementation
+internal joins
+```
 
-
-## Projector resolver
-
-Projector definitions remain declarative JSON data.
-
-Runtime API:
+The generic browser-side consumer boundary is:
 
 ```js
-validateProjectorDefinition(definition)
-parseProjectorDefinition(source)
-mergeProjectorDelta(parent, delta)
-loadProjectorDefinition(url)
-createProjectorResolutionContext({ maxDepth })
-resolveProjector(id, options)
+createDwhAdapter({ project })
+projectDwhSymbol(adapter, symbol, context)
 ```
 
-Canonical resolution:
+A DWH projection response identifies the symbol it satisfies and carries the projected data. Symbol mismatch or dependency failure is an error; WebEngine does not invent a second canonical source.
+
+## SiteTree
+
+The canonical site hierarchy is owned by DWH and exposed initially as:
 
 ```text
-LMTS:ranking
-  -> /app/lmts/projectors/ranking.json
-
-LMTS:ranking:top3
-  -> /app/lmts/projectors/ranking.json
-  -> /app/lmts/projectors/ranking/top3.json
+#SITE
 ```
 
-Merge semantics are intentionally minimal:
+Authority flow:
 
 ```text
-object + object -> recursive merge
-array           -> replace
-scalar          -> replace
-null            -> replace
+DWH entities + relations
+        ↓
+      #SITE
+        ↓
+WebEngine validates projection
+        ↓
+immutable SiteTree runtime index
+        ↓
+navigation / breadcrumbs / sitemap / current section / page context
 ```
 
-There are no deletion operators, expressions, conditions or executable projector directives. Projector JSON remains data rather than becoming a programming language.
+`site.json` is not the semantic identity or authority. JSON may exist as transport serialization, cache or diagnostic output, but the runtime identity is `#SITE`.
 
-Top-level `id`, `domain` and `entry` are rejected because they are derivable from the canonical projector ID.
-
-Resolved projections are deep-frozen. Missing/invalid definitions fail closed and partial merge results are never returned.
-
-Nested resolution must reuse the active resolution context. The context rejects canonical projector cycles and enforces a bounded recursion depth.
-
-## Canonical concerns
-
-```text
-Content
-= typed page/site content resources
-
-SiteTree
-= the canonical public site hierarchy mechanism over /site.json
-
-Navigation
-= derived SiteTree projections such as global/local navigation and breadcrumbs
-
-Actions
-= user-triggered action identity, labels and action bindings
-```
-
-These concerns are intentionally separate.
-
-The public site hierarchy exists canonically once in `/site.json`. Navigation, breadcrumbs, sitemap, current section and active navigation state are derived projections of SiteTree; they are not separately maintained hierarchy authorities.
-
-Navigation labels come from SiteTree. Action/button labels are owned by Actions. Neither belongs in Content.
-
-API and service routing are separate machine-interface concerns and are not derived from the public SiteTree hierarchy.
-
-## SiteTree contract
-
-Canonical instance:
-
-```text
-/site.json
-```
-
-Current node shape:
+Current SiteTree node projection:
 
 ```text
 id
@@ -152,477 +146,234 @@ path
 children
 ```
 
-WebEngine owns:
+WebEngine validates this shape, creates an immutable runtime snapshot and performs exact id/path lookup. It does not infer missing hierarchy or author a competing tree.
+
+## Navigation
+
+Navigation is runtime projection state derived from the validated `#SITE` snapshot.
+
+WebEngine may derive:
 
 ```text
-SiteTree contract
-parser
-validator
-indexer
-resolver
-derived projection mechanisms
-```
-
-The AIGM.fi instance owns the actual `/site.json` data.
-
-
-
-## SiteTree runtime API
-
-WebEngine exposes a small deterministic SiteTree runtime:
-
-```js
-loadSiteTree()
-parseSiteTree(source)
-validateSiteTree(root)
-createSiteTreeIndex(root)
-resolveSiteNodeById(siteTree, id)
-resolveSiteNodeByPath(siteTree, path)
-```
-
-Default loader target:
-
-```text
-/site.json
-```
-
-The runtime does not normalize or repair hierarchy identity. IDs and public paths resolve exactly as declared. Invalid JSON, invalid node shape, duplicate IDs, duplicate paths, cycles and fetch failures reject instead of creating fallback hierarchy.
-
-`createSiteTreeIndex()` creates an isolated frozen snapshot so later mutation of the source object cannot mutate the runtime hierarchy.
-
-This step implements SiteTree loading, parsing, validation, indexing and exact resolution only. Navigation, breadcrumbs and other SiteTree projections remain a separate layer.
-
-
-
-## SiteTree projections
-
-SiteTree projection helpers derive presentation data from the canonical runtime snapshot without exposing canonical nodes as mutable presentation state:
-
-```js
-projectGlobalNavigation(siteTree)
-projectLocalNavigation(siteTree, currentPath)
-projectBreadcrumbs(siteTree, currentPath)
-projectSitemap(siteTree)
-resolveCurrentSection(siteTree, currentPath)
-projectActiveNavigationState(siteTree, currentPath)
-```
-
-Semantics:
-
-```text
-global navigation = root children
-local navigation  = exact current node children
-breadcrumbs       = root -> current lineage
-sitemap           = recursive detached SiteTree projection
-current section   = first node below the SiteTree root
-active state      = current node id + ordered ancestor ids
-```
-
-All projections are detached immutable values. They may be duplicated anywhere without becoming hierarchy authority.
-
-Current-path resolution is exact. Projection logic does not lowercase paths, append or remove slashes, prefix-match, or infer hierarchy from URL strings. Unknown paths produce the projection type's empty/null inactive result.
-
-## Presentation contract
-
-WebEngine owns the semantic meaning of the shared application/composition namespace:
-
-```text
-.we-*
-```
-
-Current public classes:
-
-```text
-.we-shell
-.we-header
-.we-main
-.we-nav
-.we-nav-item
-.we-page
-.we-section
-.we-projector
-.we-projector-header
-.we-projector-body
-.we-content
-```
-
-These names describe structural/application semantics, not visual appearance.
-
-State is represented with semantic carriers where a dedicated structural class is unnecessary:
-
-```text
-data-state
-data-status
-data-variant
-aria-current
-native disabled state
-```
-
-The owning subsystem defines the value vocabulary for a state carrier. The presentation contract does not invent renderer lifecycle states, business statuses or domain variants.
-
-WebEngine owns the semantics. Style owns their visual implementation. WebGUI keeps its separate `.wg-*` primitive namespace.
-
-Presentation state is never authorization authority.
-
-
-
-## Renderer lifecycle
-
-Canonical renderer entry:
-
-```text
-mount(target, projection, context)
-```
-
-A renderer mount may be synchronous or asynchronous. A successful mount may return a mount-instance result:
-
-```text
-{
-  state: "ready" | "empty",   // optional, default = ready
-  destroy: () => void | Promise<void>   // optional
-}
-```
-
-Cleanup belongs to the individual mount instance returned by one `mount()` call. The same renderer module may be mounted concurrently in multiple projector boundaries, so a module-global cleanup function is not the canonical lifecycle model.
-
-WebEngine owns the projector-boundary lifecycle:
-
-```text
-loading
-ready
-empty
-denied
-error
-destroy
-```
-
-The state is published on:
-
-```text
-.we-projector[data-state]
-```
-
-`denied` is produced by WebEngine authorization orchestration and never by the renderer. `error` is produced by orchestration when resolution/loading/mount fails. A successful renderer may report only `ready` or `empty`.
-
-Each mount attempt has its own generation identity. Late async completion from an obsolete generation must never overwrite DOM or lifecycle state belonging to a newer generation. If an obsolete mount later resolves with a cleanup handle, WebEngine destroys that stale instance instead of publishing it.
-
-`destroy` is terminal for one mount generation. A reused projector boundary may later start a new generation from `loading`.
-
-
-
-## Renderer runtime
-
-Renderer modules are resolved from the canonical projector ID:
-
-```text
-LMTS:ranking
--> /app/lmts/renderers/ranking.js
-```
-
-An explicit override is allowed only inside the same domain renderer root.
-
-Runtime API:
-
-```js
-validateRendererModuleUrl(url, projectorId)
-resolveRendererModuleUrl(projectorId, { override })
-loadRendererModule(url, options)
-normalizeMountResult(value)
-mountResolvedProjector(boundary, resolvedProjector, context, options)
-denyRendererBoundary(boundary, options)
-destroyRendererBoundary(boundary, options)
-```
-
-Each mount uses a boundary-local monotonic generation id and an isolated staging target. Renderer DOM is committed into the live `.we-projector` boundary only if the generation is still current after async mount completion.
-
-This prevents stale async mounts from overwriting a newer projection.
-
-Renderer cleanup is mount-instance scoped. A returned `destroy()` handle is invoked at most once for the generation that created it.
-
-Lifecycle state is published only through:
-
-```text
-.we-projector[data-state]
-```
-
-with:
-
-```text
-loading
-ready
-empty
-denied
-error
-destroy
-```
-
-`ready` and `empty` may come from successful renderer mount results. `denied`, `error` and `destroy` remain WebEngine orchestration states.
-
-## Content contract
-
-Canonical fields:
-
-```text
-id
-domain
-type
-provider
-content
-```
-
-Canonical content types:
-
-```text
-text
-image
-svg
-video
-embed
-file
-```
-
-`type` defines presentation semantics. `provider` defines the resolver namespace/source.
-
-Examples:
-
-```text
-type=image, provider=brand, content=logo.webp
-type=svg, provider=brand, content=architecture.svg
-type=embed, provider=youtube, content=<provider resource id>
-type=text, provider=inline, content=<text>
-```
-
-Projectors consume canonical content references; they do not own physical asset paths or provider-specific resolution logic.
-
-
-
-## Content runtime
-
-Canonical Content records remain:
-
-```text
-id
-domain
-type
-provider
-content
-```
-
-The runtime exposes:
-
-```js
-validateContentRecord(record)
-freezeContentRecord(record)
-createContentProviderRegistry()
-createInlineTextProvider()
-createAssetProvider(baseUrl)
-createEmbedProvider(resolveResource)
-resolveContent(record, registry, context)
-```
-
-Providers resolve source values only. They do not redefine Content type semantics.
-
-Resolved descriptors are typed by WebEngine:
-
-```text
-text   -> { id, domain, type, text }
-image  -> { id, domain, type, url }
-svg    -> { id, domain, type, url }
-video  -> { id, domain, type, url }
-file   -> { id, domain, type, url }
-embed  -> { id, domain, type, provider, resource, url, title? }
-```
-
-Canonical asset/embed resource identifiers are provider-relative. Parent/current-directory traversal, absolute canonical resource URLs and backslash paths are rejected.
-
-Provider-returned URLs exposed by WebEngine must be root-relative or use HTTP(S). Executable/opaque schemes such as `javascript:`, `data:`, `file:` and `blob:` are rejected.
-
-Embeds remain structured descriptors. Providers cannot return authoritative HTML or iframe payloads.
-
-This runtime step does not choose a Content persistence backend and does not implement projector loading.
-
-
-
-## Shell, page composition and Actions
-
-WebEngine composes a shared shell directly from canonical SiteTree projections:
-
-```js
-createPageContext(siteTree, currentPath)
-createWebEngineShell({ document, siteTree, currentPath, title })
-createProjectorSlot(composition, resolvedProjector, options)
-mountProjectorSlot(slot, resolvedProjector, context, options)
-composeProjector(composition, resolvedProjector, context, options)
-destroyWebEngineComposition(composition, options)
-```
-
-The page context contains detached derived values only:
-
-```text
-currentPath
-currentNode
-currentSection
-globalNavigation
-localNavigation
+global navigation
+local navigation
 breadcrumbs
-activeNavigation
+sitemap
+current section
+active state
 ```
 
-The shell emits the existing public WebEngine presentation semantics:
+These are runtime views, not canonical hierarchy authorities.
+
+## Content
+
+Canonical Content identity, declarations and relations belong to DWH.
+
+WebEngine owns only runtime Content execution:
 
 ```text
-.we-shell
-.we-header
-.we-main
-.we-page
-.we-nav
-.we-nav-item
-.we-section
-.we-projector-header
-.we-projector
+validate projected Content record
+select registered provider adapter
+resolve provider-relative resource
+normalize safe presentation descriptor
+hand descriptor to renderer/presentation layer
 ```
 
-Navigation DOM is not a separate public authority. Shell navigation is built from SiteTree-derived Navigation projections, and unaddressable structural nodes never receive invented links.
+Provider resolution does not transfer Content authority to WebEngine.
 
-Projector slots bind one resolved projector identity to one renderer boundary. Renderer lifecycle remains owned by the renderer subsystem, and one projector failure is isolated to that slot.
+## Projectors
 
-Actions remain separate from Navigation and Content:
+Canonical projector declarations and their relations belong to DWH.
 
-```js
-parseActionRef(action)
-validateActionRecord(record)
-freezeActionRecord(record)
-createActionRegistry()
-executeAction(record, executor, options)
-bindActionControl(control, record, executor, options)
-```
-
-Canonical Action record:
+WebEngine owns projector execution:
 
 ```text
-id
-label
-action = DOMAIN:ACTION
+receive effective projector projection
+validate it
+construct runtime context
+perform AccessCore preflight when required
+load renderer
+mount renderer
+track lifecycle
+isolate failure
+destroy stale/obsolete mount instances
 ```
 
-WebEngine owns action identity, label and binding of user intent to an external action reference. The supplied executor owns the actual domain behavior. UI visibility, labels, listeners or disabled state never grant authorization.
+Projector declarations remain data. Renderer modules remain executable presentation implementations.
 
-IAM identity and AccessCore authorization adapters are intentionally not implemented by this composition step.
+## Composition
 
+DWH owns the canonical composition graph: page/section structure, ordering, projector placement, Content placement, renderer bindings and Action placement.
 
-
-## IAM identity context
-
-IAM remains the identity/authentication/session authority. WebEngine only adapts the current IAM session into immutable runtime context:
-
-```js
-loadIAMIdentityContext({ domain })
-normalizeIAMIdentityPayload(payload, { domain })
-createAnonymousIAMIdentityContext(domain)
-```
-
-Canonical browser endpoint:
+WebEngine executes that graph into a runtime composition instance.
 
 ```text
-GET /iam/api/me.php?domain=<domain>
+DWH composition projection
+        ↓
+WebEngine execution
+        ↓
+page context
+slots
+renderer boundaries
+WebGUI / S3D primitives
 ```
 
-Browser session transport uses IAM's Secure/HttpOnly same-origin cookie. Raw IAM bearer/session tokens are not copied into WebEngine context.
+Runtime composition state is disposable and rebuildable. It never becomes a second canonical page model.
 
-Authenticated context:
+## Actions
+
+Canonical Action identity, label/metadata, domain action reference and placement belong to DWH.
+
+WebEngine owns the runtime binding:
 
 ```text
-authority      = IAM
-authenticated  = true
-domain
-contract       = iam.light
-version        = 1.x
-authLevel      = light
-subject        = { id, username, status, verified }
-managementTier = 3 | 2 | 1 | 1337
+presented control
+      ↓
+projected Action declaration
+      ↓
+AccessCore decision when required
+      ↓
+external domain executor
 ```
 
-`managementTier` is IAM user-management metadata only. It is never converted into application permissions, roles, or AccessCore allow/deny decisions.
+WebEngine does not implement domain business behavior. UI visibility, disabled state or listener presence never grants authority.
 
-HTTP 401 from IAM means anonymous identity. Other IAM/domain failures remain adapter errors rather than being silently reinterpreted as authorization results.
+## IAM integration
 
-Application authorization remains a separate AccessCore concern.
+IAM is the identity/authentication authority.
 
+WebEngine consumes identity context only:
 
-
-## AccessCore preflight
-
-WebEngine integrates with AccessCore through a dependency-injected decision adapter:
-
-```js
-createAccessCoreAdapter({ check })
-createAccessCoreRequest({ identity, action, resource, context })
-checkAccess(adapter, request)
-preflightProjectorAccess(boundary, resolvedProjector, access, adapter, options)
+```text
+IAM -> who is this subject?
 ```
 
-Canonical decision remains:
+WebEngine does not store passwords, become a session authority or translate IAM management tiers into application permission.
+
+## AccessCore integration
+
+AccessCore is the authorization authority.
+
+Canonical decision:
 
 ```text
 (subject, action, resource, context)
         ↓
-     AccessCore
+    AccessCore
         ↓
    allow | deny
 ```
 
-WebEngine does not invent an AccessCore HTTP endpoint or implement authorization policy.
+WebEngine may request and consume this decision. It does not own policy.
 
-Action and resource semantics are always supplied explicitly by the owning domain. They are not derived from projector IDs, DOM state or IAM management tiers.
+A denied projector/action may be gated in presentation, but the service performing a protected operation must enforce authorization again at the actual action/resource boundary.
 
-IAM identity is projected into the AccessCore subject without `managementTier`:
+## WebGUI boundary
 
-```text
-authenticated:
-  authority=IAM
-  authenticated=true
-  id
-  username
-  verified
+WebGUI provides standalone, generic DOM/UI primitives.
 
-anonymous:
-  authority=IAM
-  authenticated=false
-```
-
-Anonymous identity is still submitted to AccessCore. WebEngine does not auto-deny anonymous users.
-
-Projector preflight mapping:
+WebEngine may compose WebGUI primitives but must not redefine or absorb them.
 
 ```text
-allow
-  -> renderer mount
-  -> ready | empty
-
-deny
-  -> no renderer load/mount
-  -> denied
-
-adapter/policy dependency failure
-  -> no renderer mount
-  -> error
-  -> failure propagated
+WebEngine -> WebGUI
+WebGUI -/-> WebEngine
 ```
 
-A denied/hidden projector remains presentation gating only. The domain service that executes a protected operation must enforce authorization again at the actual action/resource boundary.
+WebGUI owns `.wg-*` generic UI semantics. WebEngine owns `.we-*` application/runtime composition semantics.
 
-## Identity and authorization
+## S3D boundary
 
-IAM answers **who** the subject is.
+S3D provides standalone structural spatial/3D primitives and reusable spatial domain modules.
 
-AccessCore answers only:
+WebEngine may orchestrate S3D instances when a projection requires spatial presentation, but S3D does not become aware of DWH, IAM, AccessCore or WebEngine application semantics.
 
 ```text
-(subject, action, resource, context) -> allow | deny
+WebEngine -> S3D
+S3D -/-> WebEngine
 ```
 
-WebEngine may request an authorization decision but never owns authorization policy.
+## Renderer lifecycle
 
-UI visibility or projector gating is never the authoritative backend security boundary.
+Renderer execution is WebEngine runtime authority.
 
-See `Contracts/` for canonical boundaries.
+Canonical projector-boundary lifecycle:
+
+```text
+loading
+ready
+empty
+denied
+error
+destroy
+```
+
+Each mount attempt has independent generation identity. Obsolete asynchronous mounts must not overwrite newer state. Cleanup is mount-instance scoped.
+
+Renderer state is runtime state only. It never mutates canonical DWH declarations.
+
+## Relocatable runtime root
+
+Physical runtime code/resources may be deployed under a temporary root without changing canonical DWH identity.
+
+Example:
+
+```text
+/test/lib/webengine/webengine.js -> instance root /test/
+/lib/webengine/webengine.js      -> instance root /
+```
+
+Logical domain/runtime paths remain deployment-neutral. DWH symbols such as `#SITE` do not contain deployment prefixes.
+
+Temporary deployment location is physical runtime data, not application semantics.
+
+## Domain boundary
+
+Domain services own domain business behavior.
+
+```text
+DWH        -> declares relationships/bindings
+WebEngine  -> executes browser composition
+Domain     -> executes business behavior
+AccessCore -> decides authority
+```
+
+WebEngine must not turn declarative Actions or Projectors into a hidden domain service layer.
+
+## Dependency direction
+
+```text
+IAM -----------┐
+AccessCore ----┤
+DWH -----------┤
+               ▼
+           WebEngine
+           /       \
+      WebGUI       S3D
+```
+
+Authority flows into WebEngine. Canonical authority does not flow back out of WebEngine.
+
+## Architectural invariants
+
+1. One canonical authority per concern.
+2. DWH owns declarative website structure.
+3. WebEngine owns execution of that structure in the browser.
+4. IAM owns identity/authentication.
+5. AccessCore owns authorization decisions.
+6. WebGUI owns generic UI primitives.
+7. S3D owns generic spatial/3D primitives.
+8. Domain services own business execution.
+9. Runtime state is never promoted to canonical DWH truth.
+10. WebEngine never infers DWH relations from storage layout.
+11. Resolvability and visibility never imply authority.
+12. Dependency failure does not cause invention of fallback canonical data.
+13. Physical deployment paths do not define canonical identity.
+14. Presentation semantics and visual styling remain separate concerns.
+
+## Implementation status
+
+This README and the machine-readable contracts define the target WebEngine architecture used for implementation and external evaluation.
+
+The current runtime is being migrated to this boundary. Existing helpers that still derive declarations from physical files are implementation debt to be removed in the code phase; they do not override this contract.
+
+See `Contracts/` for the machine-readable responsibility and interface boundaries.

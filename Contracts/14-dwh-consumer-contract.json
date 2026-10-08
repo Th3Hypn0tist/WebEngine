@@ -1,0 +1,30 @@
+{
+  "name": "DWH Projection Consumer",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "purpose": "consume named DWH projections without coupling WebEngine to DWH storage, PHP implementation or relation internals",
+  "publicApi": [
+    "createDwhAdapter({ project })",
+    "projectDwhSymbol(adapter, symbol, context)",
+    "normalizeDwhProjectionEnvelope(value, expectedSymbol)"
+  ],
+  "symbolPattern": "^#[A-Z][A-Z0-9_:-]*$",
+  "envelope": {
+    "required": [
+      "symbol",
+      "data"
+    ],
+    "optional": [
+      "revision",
+      "generated_at"
+    ]
+  },
+  "rules": [
+    "WebEngine calls DWH by semantic symbol",
+    "DWH projection responses must identify the symbol they satisfy",
+    "symbol mismatch is an error",
+    "storage tables, joins, PHP classes and persistence backend are outside WebEngine semantics",
+    "WebEngine does not invent fallback projections when DWH resolution fails",
+    "#SITE is the initial DWH symbol consumed by WebEngine"
+  ]
+}

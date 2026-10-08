@@ -241,3 +241,21 @@ test('resolution context is reusable after failed nested resolution unwinds', as
 
   assert.equal(resolved.projection.title, 'Ranking');
 });
+
+
+test('projector resolver loads definition chain from the active instance root', async () => {
+  const calls = [];
+
+  await resolveProjector('LMTS:ranking:top3', {
+    instanceRoot: '/test/',
+    fetch: async url => {
+      calls.push(url);
+      return response({});
+    },
+  });
+
+  assert.deepEqual(calls, [
+    '/test/app/lmts/projectors/ranking.json',
+    '/test/app/lmts/projectors/ranking/top3.json',
+  ]);
+});

@@ -1,22 +1,25 @@
 {
   "name": "SiteTree",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "owner": "WebEngine",
-  "kind": "public site hierarchy mechanism",
-  "canonicalInstance": "/site.json",
-  "purpose": "provide one human-editable canonical authority for the public site hierarchy and deterministic derived projections",
+  "kind": "DWH SiteTree projection consumer mechanism",
+  "canonicalSource": {
+    "authority": "DWH",
+    "symbol": "#SITE"
+  },
+  "purpose": "consume the DWH #SITE projection, validate it and expose deterministic SiteTree runtime lookup and derived projection mechanisms",
   "ownership": {
-    "WebEngine": [
-      "SiteTree contract",
-      "parser",
-      "validator",
-      "indexer",
-      "resolver",
-      "derived projection mechanisms"
+    "DWH": [
+      "canonical website entities and relations",
+      "ordering",
+      "the #SITE projection contract and projection result"
     ],
-    "siteInstance": [
-      "/site.json contents",
-      "AIGM.fi public hierarchy instance data"
+    "WebEngine": [
+      "#SITE consumer adapter boundary",
+      "SiteTree projection validation",
+      "immutable runtime index",
+      "exact node resolution",
+      "derived navigation/site projection mechanisms"
     ]
   },
   "nodeShape": [
@@ -26,33 +29,15 @@
     "children"
   ],
   "nodeSemantics": {
-    "id": "canonical globally unique node identity inside one SiteTree instance",
-    "label": "canonical public label for the node",
-    "path": "optional globally unique public path when the node is addressable",
-    "children": "optional ordered child SiteTree nodes; runtime canonical snapshot represents a leaf as an empty children array"
-  },
-  "runtimeValidation": [
-    "a node contains only id, label, path and children",
-    "id is required, trimmed by construction and matches [A-Za-z0-9][A-Za-z0-9_-]*",
-    "label is required and is a non-empty trimmed string",
-    "path is optional; when present it is a non-empty trimmed absolute public path beginning with /",
-    "path contains no query or fragment component",
-    "ids are globally unique inside one SiteTree instance",
-    "paths are globally unique among addressable nodes inside one SiteTree instance",
-    "children is an array when present",
-    "cycles and reused node objects are rejected",
-    "validation does not normalize, repair or infer missing authority"
-  ],
-  "runtimeIndex": {
-    "snapshot": "createSiteTreeIndex creates an isolated immutable runtime snapshot from validated instance data",
-    "idLookup": "exact canonical id lookup",
-    "pathLookup": "exact canonical path lookup",
-    "unknown": "a syntactically valid unknown id/path resolves to null",
-    "normalization": "resolver does not lowercase, append slashes, remove slashes or otherwise normalize lookup identity"
+    "id": "canonical SiteTree node identity supplied by #SITE",
+    "label": "canonical public label supplied by #SITE",
+    "path": "optional globally unique logical public path supplied by #SITE",
+    "children": "ordered projected child nodes supplied by #SITE"
   },
   "loader": {
-    "default": "/site.json",
-    "failure": "load/parse/validation failure rejects; no fallback hierarchy is invented"
+    "defaultSymbol": "#SITE",
+    "input": "DWH adapter implementing project(symbol, context)",
+    "failure": "DWH adapter, envelope or SiteTree validation failure rejects; no file fallback or invented hierarchy"
   },
   "derivedProjections": [
     "global navigation",
@@ -64,14 +49,16 @@
     "public site path resolution"
   ],
   "rules": [
-    "/site.json is site instance data and must not live under /lib/webengine/",
-    "SiteTree is the only canonical public hierarchy authority",
-    "Navigation, breadcrumbs and sitemap are derived from SiteTree",
-    "derived projections may be duplicated; hierarchy authority may not",
+    "DWH is the canonical authority for relations from which #SITE is projected",
+    "#SITE is the SiteTree runtime identity",
+    "site.json is not a canonical SiteTree authority",
+    "JSON may be a transport serialization but does not define identity",
+    "WebEngine validates #SITE output before creating the immutable SiteTree runtime snapshot",
+    "Navigation, breadcrumbs and sitemap are derived from the validated SiteTree snapshot",
+    "WebEngine does not infer DWH relations or inspect DWH storage internals",
     "public means exposed or addressable and does not imply anonymous access",
-    "public topic architecture and technical/runtime ownership are separate layers",
-    "API and service routing are separate machine-interface concerns and must not be inferred from SiteTree",
-    "invalid or ambiguous SiteTree data must not be repaired by inventing a second hierarchy",
-    "SiteTree must not infer authorization from hierarchy, paths or visibility"
+    "API and service routing remain separate machine-interface concerns",
+    "SiteTree must not infer authorization from hierarchy, paths or visibility",
+    "SiteTree node paths remain logical root paths and do not embed the active deployment prefix"
   ]
 }

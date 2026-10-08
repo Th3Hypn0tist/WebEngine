@@ -1,3 +1,8 @@
+import {
+  INSTANCE_ROOT_PATH,
+  resolveInstancePath,
+} from './instance-root.js';
+
 const CONTENT_TYPES = Object.freeze([
   'text',
   'image',
@@ -219,12 +224,23 @@ function createInlineTextProvider() {
   };
 }
 
-function createAssetProvider(baseUrl) {
+function createAssetProvider(
+  baseUrl,
+  {
+    instanceRoot = INSTANCE_ROOT_PATH,
+  } = {},
+) {
   if (typeof baseUrl !== 'string' || !baseUrl || baseUrl !== baseUrl.trim()) {
     throw new TypeError('asset provider baseUrl must be a non-empty trimmed string');
   }
 
-  const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const physicalBase = baseUrl.startsWith('/')
+    ? resolveInstancePath(baseUrl, { instanceRoot })
+    : baseUrl;
+
+  const normalizedBase = physicalBase.endsWith('/')
+    ? physicalBase
+    : `${physicalBase}/`;
 
   return record => {
     if (!['image', 'svg', 'video', 'file'].includes(record.type)) {

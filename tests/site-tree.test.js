@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  SITE_TREE_URL,
+  SITE_TREE_SYMBOL,
+  createDwhAdapter,
   parseSiteTree,
   validateSiteTree,
   createSiteTreeIndex,
@@ -40,7 +41,7 @@ const example = () => ({
   ],
 });
 
-test('parses and validates a SiteTree JSON document', () => {
+test('parses and validates a SiteTree JSON serialization', () => {
   const parsed = parseSiteTree(JSON.stringify(example()));
   assert.equal(parsed.id, 'aigm');
   assert.equal(parsed.children[0].children[0].id, 'expose');
@@ -110,37 +111,38 @@ test('resolves ids and paths exactly without implicit normalization', () => {
   assert.equal(resolveSiteNodeByPath(siteTree, '/iam'), null);
 });
 
-test('rejects resolvers used with a non-SiteTree index', () => {
-  assert.throws(() => resolveSiteNodeById({}, 'iam'), TypeError);
-  assert.throws(() => resolveSiteNodeByPath({}, '/iam/'), TypeError);
-});
-
-test('loads the canonical /site.json location through an injected fetch', async () => {
+test('loads SiteTree from the DWH #SITE symbol', async () => {
   const calls = [];
-  const siteTree = await loadSiteTree({
-    fetch: async url => {
-      calls.push(url);
-      return {
-        ok: true,
-        status: 200,
-        text: async () => JSON.stringify(example()),
-      };
+  const dwh = createDwhAdapter({
+    project: async (symbol, context) => {
+      calls.push({ symbol, context });
+      return { symbol, data: example(), revision: 'r1' };
     },
   });
 
-  assert.deepEqual(calls, [SITE_TREE_URL]);
+  const siteTree = await loadSiteTree({
+    dwh,
+    context: { domain: 'site' },
+  });
+
+  assert.deepEqual(calls, [{ symbol: SITE_TREE_SYMBOL, context: { domain: 'site' } }]);
   assert.equal(resolveSiteNodeByPath(siteTree, '/aigmos/expose/').id, 'expose');
 });
 
-test('fails closed on unsuccessful SiteTree fetch', async () => {
-  await assert.rejects(
-    loadSiteTree({
-      fetch: async () => ({
-        ok: false,
-        status: 404,
-        text: async () => '',
-      }),
-    }),
-    /HTTP 404/,
-  );
+test('fails closed when DWH projection cannot be resolved', async () => {
+  const dwh = createDwhAdapter({
+    project: async () => {
+      throw new Error('DWH unavailable');
+    },
+  });
+
+  await assert.rejects(loadSiteTree({ dwh }), /DWH unavailable/);
+});
+
+test('fails closed when #SITE projection shape is invalid', async () => {
+  const dwh = createDwhAdapter({
+    project: async symbol => ({ symbol, data: { nope: true } }),
+  });
+
+  await assert.rejects(loadSiteTree({ dwh }));
 });

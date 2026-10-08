@@ -1,8 +1,8 @@
 {
   "name": "Composition",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "WebEngine",
-  "purpose": "compose shared shell, page context, Navigation projections and isolated projector slots without creating new authorities for hierarchy, domain behavior or renderer state",
+  "purpose": "execute a DWH-declared composition graph in the browser while preserving separate authority for hierarchy, declarations, authorization and renderer state",
   "pageContext": {
     "function": "createPageContext(siteTree, currentPath)",
     "fields": [
@@ -62,12 +62,29 @@
     ]
   },
   "rules": [
-    "Composition consumes SiteTree and Navigation projections; it does not become hierarchy authority",
-    "Composition consumes resolved projectors; it does not become projector-definition authority",
+    "DWH owns canonical composition declarations; WebEngine executes them",
+    "Composition consumes #SITE and other DWH projections; it does not become declaration authority",
     "Composition delegates renderer lifecycle to the renderer subsystem",
-    "Composition does not execute Actions or domain business behavior",
-    "Composition does not infer authorization from visibility or DOM state",
-    "IAM identity and AccessCore authorization adapters are separate integration concerns",
+    "Composition does not execute domain business semantics directly",
+    "Composition does not infer authorization from visibility or runtime state",
+    "IAM identity and AccessCore authorization adapters remain separate authority integrations",
     "routing/page context is descriptive runtime context, not an authorization boundary"
-  ]
+  ],
+  "authority": {
+    "DWH": [
+      "page/section composition graph",
+      "ordering",
+      "projector placement",
+      "content placement",
+      "renderer binding declarations",
+      "action placement"
+    ],
+    "WebEngine": [
+      "page context",
+      "runtime composition instance",
+      "mount/unmount lifecycle",
+      "DOM/S3D orchestration",
+      "failure isolation"
+    ]
+  }
 }

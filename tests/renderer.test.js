@@ -445,3 +445,29 @@ test('errorRendererBoundary supersedes and destroys an existing mounted generati
   assert.equal(boundary.dataset.state, 'error');
   assert.equal(destroyCount, 1);
 });
+
+
+test('renderer resolution stays inside the active instance root', () => {
+  assert.equal(
+    resolveRendererModuleUrl('LMTS:ranking', {
+      instanceRoot: '/test/',
+    }),
+    '/test/app/lmts/renderers/ranking.js',
+  );
+
+  assert.equal(
+    resolveRendererModuleUrl('LMTS:ranking', {
+      instanceRoot: '/test/',
+      override: '/app/lmts/renderers/ranking/compact.js',
+    }),
+    '/test/app/lmts/renderers/ranking/compact.js',
+  );
+
+  assert.throws(() =>
+    validateRendererModuleUrl(
+      '/app/lmts/renderers/ranking.js',
+      'LMTS:ranking',
+      { instanceRoot: '/test/' },
+    )
+  );
+});
