@@ -144,3 +144,21 @@ test('fails closed on unsuccessful SiteTree fetch', async () => {
     /HTTP 404/,
   );
 });
+
+
+test('loads SiteTree from a relocatable instance root', async () => {
+  const calls = [];
+  await loadSiteTree({
+    instanceRoot: '/test/',
+    fetch: async url => {
+      calls.push(url);
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(example()),
+      };
+    },
+  });
+
+  assert.deepEqual(calls, ['/test/site.json']);
+});
