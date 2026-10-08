@@ -1,0 +1,92 @@
+{
+  "name": "AccessCore Preflight",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "authorizationAuthority": "AccessCore",
+  "verifiedAgainst": {
+    "repositoryContract": "AccessCore/Contracts/01-decision-contract.json",
+    "canonicalFunction": "(subject, action, resource, context) -> allow | deny",
+    "currentTransport": "none mandated"
+  },
+  "purpose": "adapt IAM identity context and explicit domain-owned action/resource semantics to an asynchronous AccessCore decision boundary without implementing authorization policy",
+  "runtimeApi": [
+    "projectIAMAccessSubject(identity)",
+    "normalizeAccessCoreDecisionRequest(request)",
+    "createAccessCoreRequest(options)",
+    "normalizeAccessCoreDecision(decision)",
+    "createAccessCoreAdapter({ check })",
+    "checkAccess(adapter, request)",
+    "preflightProjectorAccess(boundary, resolvedProjector, access, adapter, options)"
+  ],
+  "adapter": {
+    "required": "async-compatible check(request) -> allow | deny",
+    "transport": "dependency-injected; WebEngine does not invent an HTTP endpoint",
+    "decision": [
+      "allow",
+      "deny"
+    ],
+    "invalidDecision": "adapter failure; never coerced to allow or deny"
+  },
+  "subjectProjection": {
+    "authenticated": [
+      "authority=IAM",
+      "authenticated=true",
+      "id",
+      "username",
+      "verified"
+    ],
+    "anonymous": [
+      "authority=IAM",
+      "authenticated=false"
+    ],
+    "excluded": [
+      "IAM managementTier",
+      "passwords",
+      "session/bearer tokens",
+      "application permissions"
+    ],
+    "rule": "anonymous identity is still submitted to AccessCore; WebEngine does not auto-deny it"
+  },
+  "request": {
+    "required": [
+      "subject",
+      "action",
+      "resource"
+    ],
+    "optional": [
+      "context"
+    ],
+    "authority": {
+      "subject": "IAM-derived projection",
+      "action": "owning domain",
+      "resource": "owning domain",
+      "context": "trusted caller/runtime context"
+    },
+    "mustNot": [
+      "derive action from projector id",
+      "derive resource from projector id",
+      "derive authorization from IAM management tier",
+      "infer authorization from DOM or presentation state"
+    ]
+  },
+  "projectorPreflight": {
+    "allow": "mount renderer through canonical renderer lifecycle",
+    "deny": "do not invoke renderer; publish projector lifecycle state denied",
+    "adapterFailure": "publish projector lifecycle state error and propagate failure",
+    "rendererContext": "allowed renderer receives identity context plus non-authoritative access presentation context"
+  },
+  "securityBoundary": {
+    "rule": "projector preflight is presentation gating only",
+    "backend": "the owning service that performs the protected action must enforce authorization at the actual action boundary"
+  },
+  "rules": [
+    "AccessCore remains the sole application authorization decision authority",
+    "WebEngine owns adaptation and presentation gating only",
+    "WebEngine does not implement policy evaluation",
+    "WebEngine does not translate IAM management tiers into permissions",
+    "allow is not cached across subject/action/resource/context changes",
+    "deny is an AccessCore decision, not the absence of identity",
+    "adapter failure is not rewritten as deny",
+    "UI denied/hidden state is not a service-side security boundary"
+  ]
+}

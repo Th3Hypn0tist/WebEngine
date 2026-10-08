@@ -8,6 +8,7 @@ import {
   normalizeMountResult,
   mountResolvedProjector,
   denyRendererBoundary,
+  errorRendererBoundary,
   destroyRendererBoundary,
 } from '../webengine.js';
 
@@ -400,4 +401,47 @@ test('boundary can start a new generation after denied error or destroy terminal
 
   assert.equal(afterDestroy.state, 'ready');
   assert.equal(boundary.children[0].textContent, 'again');
+});
+
+
+test('errorRendererBoundary publishes orchestration error without invoking a renderer', async () => {
+  const boundary = createBoundary();
+
+  const result = await errorRendererBoundary(boundary, {
+    projectorId: 'LMTS:ranking',
+  });
+
+  assert.equal(result.state, 'error');
+  assert.equal(boundary.dataset.state, 'error');
+  assert.deepEqual(boundary.children, []);
+});
+
+test('errorRendererBoundary supersedes and destroys an existing mounted generation', async () => {
+  const boundary = createBoundary();
+  let destroyCount = 0;
+
+  await mountResolvedProjector(
+    boundary,
+    resolved(),
+    {},
+    {
+      importModule: async () => ({
+        mount() {
+          return {
+            destroy() {
+              destroyCount += 1;
+            },
+          };
+        },
+      }),
+    },
+  );
+
+  const result = await errorRendererBoundary(boundary, {
+    projectorId: 'LMTS:ranking',
+  });
+
+  assert.equal(result.state, 'error');
+  assert.equal(boundary.dataset.state, 'error');
+  assert.equal(destroyCount, 1);
 });

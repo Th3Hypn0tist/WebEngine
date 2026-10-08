@@ -1,6 +1,6 @@
 {
   "name": "Renderer Lifecycle",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "owner": "WebEngine",
   "purpose": "define renderer resolution, isolated loading/mounting, generation-safe commit, mount-instance cleanup and projector-boundary lifecycle semantics",
   "defaultResolution": {
@@ -47,6 +47,7 @@
     "normalizeMountResult(value)",
     "mountResolvedProjector(boundary, resolvedProjector, context, options)",
     "denyRendererBoundary(boundary, options)",
+    "errorRendererBoundary(boundary, options)",
     "destroyRendererBoundary(boundary, options)"
   ],
   "mountSemantics": {
@@ -87,7 +88,8 @@
       "error is produced by orchestration and is never used as a renderer success result",
       "destroy is terminal for one mount generation even when the boundary is later reused",
       "presentation state does not grant or revoke authorization",
-      "destroy -> loading is allowed only for a distinct new generation"
+      "destroy -> loading is allowed only for a distinct new generation",
+      "error may be published by trusted WebEngine orchestration before renderer mount when a preflight dependency fails"
     ]
   },
   "asyncAndRaceSafety": {

@@ -548,6 +548,69 @@ HTTP 401 from IAM means anonymous identity. Other IAM/domain failures remain ada
 
 Application authorization remains a separate AccessCore concern.
 
+
+
+## AccessCore preflight
+
+WebEngine integrates with AccessCore through a dependency-injected decision adapter:
+
+```js
+createAccessCoreAdapter({ check })
+createAccessCoreRequest({ identity, action, resource, context })
+checkAccess(adapter, request)
+preflightProjectorAccess(boundary, resolvedProjector, access, adapter, options)
+```
+
+Canonical decision remains:
+
+```text
+(subject, action, resource, context)
+        ↓
+     AccessCore
+        ↓
+   allow | deny
+```
+
+WebEngine does not invent an AccessCore HTTP endpoint or implement authorization policy.
+
+Action and resource semantics are always supplied explicitly by the owning domain. They are not derived from projector IDs, DOM state or IAM management tiers.
+
+IAM identity is projected into the AccessCore subject without `managementTier`:
+
+```text
+authenticated:
+  authority=IAM
+  authenticated=true
+  id
+  username
+  verified
+
+anonymous:
+  authority=IAM
+  authenticated=false
+```
+
+Anonymous identity is still submitted to AccessCore. WebEngine does not auto-deny anonymous users.
+
+Projector preflight mapping:
+
+```text
+allow
+  -> renderer mount
+  -> ready | empty
+
+deny
+  -> no renderer load/mount
+  -> denied
+
+adapter/policy dependency failure
+  -> no renderer mount
+  -> error
+  -> failure propagated
+```
+
+A denied/hidden projector remains presentation gating only. The domain service that executes a protected operation must enforce authorization again at the actual action/resource boundary.
+
 ## Identity and authorization
 
 IAM answers **who** the subject is.
