@@ -21,6 +21,62 @@ Style --------------------->
 - WebEngine owns shared application runtime behavior.
 - Domain code owns services, APIs, renderers and projector definitions.
 
+
+
+## Relocatable site instance root
+
+WebEngine derives the active site instance root from its own canonical deployment location:
+
+```text
+/test/lib/webengine/webengine.js -> /test/
+/lib/webengine/webengine.js      -> /
+```
+
+Canonical site/domain data remains deployment-neutral:
+
+```text
+/site.json
+/lmts/
+/app/lmts/projectors/ranking.json
+/app/lmts/renderers/ranking.js
+/iam/api/me.php
+```
+
+At runtime those logical paths are projected through the active instance root.
+
+Example test deployment:
+
+```text
+/test/
+├── site.json
+├── lib/
+│   ├── webengine/
+│   ├── webgui/
+│   └── s3d/
+├── style/
+├── app/
+├── iam/
+└── lmts/
+```
+
+The exact same canonical data under production root becomes:
+
+```text
+/
+├── site.json
+├── lib/
+├── style/
+├── app/
+├── iam/
+└── lmts/
+```
+
+No `/test` literal belongs in SiteTree, projector definitions, renderer paths, Content identities or domain code.
+
+The runtime applies the prefix to physical SiteTree/projector/renderer/IAM/asset requests and navigation links. Browser paths are stripped back to logical paths before SiteTree lookup.
+
+Promotion from the test mirror to production therefore changes deployment root only.
+
 ## Canonical deployment
 
 ```text
