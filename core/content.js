@@ -1,3 +1,4 @@
+import { projectDwhSymbol } from './dwh.js';
 import {
   INSTANCE_ROOT_PATH,
   resolveInstancePath,
@@ -273,6 +274,29 @@ function createEmbedProvider(resolveResource) {
   };
 }
 
+function contentIdToDwhSymbol(domain, id) {
+  assertSegment(domain, 'domain');
+  assertSegment(id, 'id');
+  return `#CONTENT:${domain}:${id}`;
+}
+
+async function loadContentDeclaration({
+  dwh,
+  domain,
+  id,
+  context = Object.freeze({}),
+} = {}) {
+  const symbol = contentIdToDwhSymbol(domain, id);
+  const projection = await projectDwhSymbol(dwh, symbol, context);
+  const canonical = freezeContentRecord(projection.data);
+
+  if (canonical.domain !== domain || canonical.id !== id) {
+    throw new Error(`Content projection identity mismatch for ${symbol}`);
+  }
+
+  return canonical;
+}
+
 async function resolveContent(record, registry, context = Object.freeze({})) {
   if (!registry || typeof registry.resolve !== 'function') {
     throw new TypeError('resolveContent requires a Content provider registry');
@@ -290,5 +314,7 @@ export {
   createInlineTextProvider,
   createAssetProvider,
   createEmbedProvider,
+  contentIdToDwhSymbol,
+  loadContentDeclaration,
   resolveContent,
 };
