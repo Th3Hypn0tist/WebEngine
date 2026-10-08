@@ -1,21 +1,15 @@
 {
   "name": "Projector",
-  "version": "0.2.0",
-  "owner": "WebEngine",
+  "version": "0.3.0",
+  "owner": "DWH (declaration authority) / WebEngine (runtime execution)",
   "idGrammar": "DOMAIN:PROJECTOR[:VARIANT...]",
   "baseResolution": {
-    "example": "LMTS:ranking",
-    "definitions": [
-      "/app/lmts/projectors/ranking.json"
-    ]
+    "semantic": "DWH projection by canonical projector identity",
+    "example": "LMTS:ranking"
   },
   "variantResolution": {
-    "example": "LMTS:ranking:top3",
-    "definitions": [
-      "/app/lmts/projectors/ranking.json",
-      "/app/lmts/projectors/ranking/top3.json"
-    ],
-    "rule": "variant definitions are declarative deltas applied in canonical parent-to-child order"
+    "semantic": "DWH returns deterministic effective projector projection from explicit variant relations",
+    "example": "LMTS:ranking:top3"
   },
   "definition": {
     "shape": "JSON object",
@@ -60,14 +54,26 @@
     "futureCompositionBinding": "recursive/nested projector composition must reuse the active resolution context"
   },
   "rules": [
+    "projector declarations are canonical DWH data, not WebEngine authority",
     "projector definitions contain data, not executable code",
-    "the domain and projector definition paths are derived from the projector id",
-    "do not store id, domain or entry when they are deterministically derivable from the canonical projector id",
-    "variant definitions contain only declarative deltas from their parent/base projector",
+    "WebEngine validates and executes a projector projection without redefining it",
     "the same projector may be composed into any number of pages or surfaces",
-    "projector resolution does not execute domain behavior",
-    "projector resolution does not grant authorization",
-    "projector resolution has no implicit fallback definition",
-    "projector resolution does not cache subject-specific protected projection data"
-  ]
+    "projector execution does not grant authorization",
+    "projector execution has no implicit fallback declaration",
+    "subject-specific protected projection data is not promoted to canonical projector authority"
+  ],
+  "authority": {
+    "DWH": [
+      "projector identity",
+      "projector declarative definition",
+      "variant/delta relations",
+      "renderer binding where declared"
+    ],
+    "WebEngine": [
+      "projector projection validation",
+      "runtime resolution of DWH projector projection",
+      "composition execution",
+      "renderer handoff"
+    ]
+  }
 }
