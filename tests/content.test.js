@@ -269,3 +269,26 @@ test('rejects unsafe provider-returned URLs before typed descriptors are exposed
     /root-relative or use http\(s\)/,
   );
 });
+
+
+test('root-relative Content asset providers follow the active instance root', async () => {
+  const registry = createContentProviderRegistry()
+    .register(
+      'brand',
+      createAssetProvider('/assets/brand', {
+        instanceRoot: '/test/',
+      }),
+    );
+
+  const result = await resolveContent(
+    record({
+      id: 'logo',
+      type: 'svg',
+      provider: 'brand',
+      content: 'logo.svg',
+    }),
+    registry,
+  );
+
+  assert.equal(result.url, '/test/assets/brand/logo.svg');
+});
