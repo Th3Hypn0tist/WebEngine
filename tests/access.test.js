@@ -6,6 +6,7 @@ import {
   createAnonymousIAMIdentityContext,
   normalizeIAMIdentityPayload,
   projectIAMAccessSubject,
+  normalizeAccessCoreDecisionRequest,
   createAccessCoreRequest,
   normalizeAccessCoreDecision,
   createAccessCoreAdapter,
@@ -104,6 +105,43 @@ test('projects anonymous IAM auth state without auto-denying it', () => {
       authority: 'IAM',
       authenticated: false,
     },
+  );
+});
+
+test('normalizes canonical AccessCore request shape without policy inference', () => {
+  const subject = Object.freeze({
+    authority: 'IAM',
+    authenticated: true,
+    id: 'usr_1',
+    username: 'TheHypnotist',
+    verified: true,
+  });
+
+  const request = normalizeAccessCoreDecisionRequest({
+    subject,
+    action: 'lmts.ranking.read',
+    resource: 'lmts.ranking:global',
+    context: {
+      page: '/lmts/ranking/',
+    },
+  });
+
+  assert.equal(request.subject, subject);
+  assert.equal(request.action, 'lmts.ranking.read');
+  assert.equal(request.resource, 'lmts.ranking:global');
+  assert.deepEqual(request.context, {
+    page: '/lmts/ranking/',
+  });
+  assert.ok(Object.isFrozen(request));
+  assert.ok(Object.isFrozen(request.context));
+
+  assert.throws(
+    () => normalizeAccessCoreDecisionRequest({
+      subject,
+      action: '  ',
+      resource: 'x',
+    }),
+    /requires a non-empty trimmed action/,
   );
 });
 
