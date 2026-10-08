@@ -406,6 +406,35 @@ async function denyRendererBoundary(
   });
 }
 
+async function errorRendererBoundary(
+  boundary,
+  {
+    projectorId = null,
+    onError = null,
+  } = {},
+) {
+  const state = getBoundaryState(boundary);
+
+  if (projectorId != null) {
+    parseProjectorId(projectorId);
+  }
+
+  await supersedeCurrent(boundary, state, onError);
+
+  const generation = createGeneration(state, projectorId);
+  generation.mountSettled = true;
+
+  state.current = generation;
+  transitionBoundary(boundary, state, 'loading');
+  transitionBoundary(boundary, state, 'error');
+
+  return Object.freeze({
+    generation: generation.id,
+    projectorId,
+    state: 'error',
+  });
+}
+
 async function destroyRendererBoundary(
   boundary,
   {
@@ -452,5 +481,6 @@ export {
   normalizeMountResult,
   mountResolvedProjector,
   denyRendererBoundary,
+  errorRendererBoundary,
   destroyRendererBoundary,
 };
