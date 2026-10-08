@@ -1,4 +1,9 @@
 import {
+  INSTANCE_ROOT_PATH,
+  resolveInstancePath,
+} from './instance-root.js';
+
+import {
   parseProjectorId,
   resolveDefaultRendererUrl,
 } from './projector-id.js';
@@ -63,7 +68,13 @@ function transitionBoundary(boundary, state, next) {
   state.publishedState = next;
 }
 
-function validateRendererModuleUrl(url, projectorId) {
+function validateRendererModuleUrl(
+  url,
+  projectorId,
+  {
+    instanceRoot = INSTANCE_ROOT_PATH,
+  } = {},
+) {
   if (typeof url !== 'string' || !url || url !== url.trim()) {
     throw new TypeError('renderer URL must be a non-empty trimmed string');
   }
@@ -72,7 +83,8 @@ function validateRendererModuleUrl(url, projectorId) {
   }
 
   const parsed = parseProjectorId(projectorId);
-  const prefix = `/app/${parsed.pathDomain}/renderers/`;
+  const logicalPrefix = `/app/${parsed.pathDomain}/renderers/`;
+  const prefix = resolveInstancePath(logicalPrefix, { instanceRoot });
 
   if (!url.startsWith(prefix)) {
     throw new Error(
@@ -90,21 +102,37 @@ function validateRendererModuleUrl(url, projectorId) {
 
 function resolveRendererModuleUrl(projectorId, {
   override = null,
+  instanceRoot = INSTANCE_ROOT_PATH,
 } = {}) {
   parseProjectorId(projectorId);
 
   if (override == null) {
-    return resolveDefaultRendererUrl(projectorId);
+    return resolveDefaultRendererUrl(projectorId, { instanceRoot });
   }
 
-  return validateRendererModuleUrl(override, projectorId);
+  const parsed = parseProjectorId(projectorId);
+  const logicalPrefix = `/app/${parsed.pathDomain}/renderers/`;
+
+  if (!override.startsWith(logicalPrefix)) {
+    throw new Error(
+      `renderer override must remain inside the projector domain renderer root: ${logicalPrefix}`,
+    );
+  }
+
+  const physicalOverride = resolveInstancePath(override, { instanceRoot });
+  return validateRendererModuleUrl(
+    physicalOverride,
+    projectorId,
+    { instanceRoot },
+  );
 }
 
 async function loadRendererModule(url, {
   projectorId,
+  instanceRoot = INSTANCE_ROOT_PATH,
   importModule = specifier => import(specifier),
 } = {}) {
-  validateRendererModuleUrl(url, projectorId);
+  validateRendererModuleUrl(url, projectorId, { instanceRoot });
 
   if (typeof importModule !== 'function') {
     throw new TypeError('renderer module loader must be a function');
@@ -266,6 +294,7 @@ async function mountResolvedProjector(
     createMountTarget = defaultCreateMountTarget,
     commitMountTarget = defaultCommitMountTarget,
     onError = null,
+    instanceRoot = INSTANCE_ROOT_PATH,
   } = {},
 ) {
   const state = getBoundaryState(boundary);
@@ -284,6 +313,7 @@ async function mountResolvedProjector(
   const projectorId = parseProjectorId(resolvedProjector.id).id;
   const moduleUrl = resolveRendererModuleUrl(projectorId, {
     override: rendererUrl,
+    instanceRoot,
   });
 
   const generation = createGeneration(state, projectorId);
@@ -311,6 +341,7 @@ async function mountResolvedProjector(
 
     const renderer = await loadRendererModule(moduleUrl, {
       projectorId,
+      instanceRoot,
       importModule,
     });
 
