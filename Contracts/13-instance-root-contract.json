@@ -1,0 +1,56 @@
+{
+  "name": "Relocatable Instance Root",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "purpose": "allow the complete site runtime tree to be deployed under a temporary prefix such as /test/ and later promoted to the domain root without changing canonical site data or domain code",
+  "canonicalLogicalRoot": "/",
+  "derivation": {
+    "moduleMarker": "/lib/webengine/",
+    "testExample": "/test/lib/webengine/webengine.js -> instance root /test/",
+    "productionExample": "/lib/webengine/webengine.js -> instance root /"
+  },
+  "logicalVsPhysical": {
+    "logical": [
+      "/site.json",
+      "/app/lmts/projectors/ranking.json",
+      "/app/lmts/renderers/ranking.js",
+      "/iam/api/me.php",
+      "/lmts/"
+    ],
+    "physicalTest": [
+      "/test/site.json",
+      "/test/app/lmts/projectors/ranking.json",
+      "/test/app/lmts/renderers/ranking.js",
+      "/test/iam/api/me.php",
+      "/test/lmts/"
+    ],
+    "rule": "canonical records and contracts store logical root paths; runtime projects them through the active instance root"
+  },
+  "runtimeApi": [
+    "deriveInstanceRootPath(moduleUrl)",
+    "resolveInstancePath(logicalPath, options)",
+    "stripInstanceRoot(publicPath, options)"
+  ],
+  "consumers": [
+    "SiteTree loader",
+    "projector definition resolver",
+    "renderer module resolver",
+    "IAM identity adapter",
+    "root-relative Content asset providers",
+    "shell/navigation href projection"
+  ],
+  "promotion": {
+    "test": "deploy complete mirrored site tree below /test/",
+    "production": "deploy the same mirrored tree at /",
+    "requiredDataChanges": "none",
+    "requiredDomainCodeChanges": "none"
+  },
+  "rules": [
+    "the literal word test is deployment data, not application semantics",
+    "SiteTree paths remain canonical logical paths such as /lmts/",
+    "current browser paths are stripped back to logical paths before SiteTree resolution",
+    "navigation links are projected back through the active instance root",
+    "instance-root projection must not permit path traversal or cross-origin path injection",
+    "existing production surfaces remain untouched until explicit cutover"
+  ]
+}
