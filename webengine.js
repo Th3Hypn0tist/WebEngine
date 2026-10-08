@@ -52,6 +52,7 @@ import {
   normalizeMountResult,
   mountResolvedProjector,
   denyRendererBoundary,
+  errorRendererBoundary,
   destroyRendererBoundary,
 } from './core/renderer.js';
 
@@ -80,7 +81,18 @@ import {
   loadIAMIdentityContext,
 } from './core/identity.js';
 
-const WEBENGINE_VERSION = '0.8.0';
+import {
+  ACCESS_DECISIONS,
+  projectIAMAccessSubject,
+  normalizeAccessCoreDecisionRequest,
+  createAccessCoreRequest,
+  normalizeAccessCoreDecision,
+  createAccessCoreAdapter,
+  checkAccess,
+  preflightProjectorAccess,
+} from './core/access.js';
+
+const WEBENGINE_VERSION = '0.9.0';
 
 export {
   WEBENGINE_VERSION,
@@ -139,4 +151,12 @@ export {
   normalizeIAMIdentityPayload,
   createAnonymousIAMIdentityContext,
   loadIAMIdentityContext,
+  ACCESS_DECISIONS,
+  projectIAMAccessSubject,
+  normalizeAccessCoreDecisionRequest,
+  createAccessCoreRequest,
+  normalizeAccessCoreDecision,
+  createAccessCoreAdapter,
+  checkAccess,
+  preflightProjectorAccess,
 };
