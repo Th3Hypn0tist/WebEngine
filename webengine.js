@@ -125,6 +125,12 @@ const WEBENGINE_VERSION = '0.15.0';
 
 export {
   WEBENGINE_VERSION,
+  WEBENGINE_DEPLOY_MARKER,
+  INSTANCE_ROOT_PATH,
+  normalizeInstanceRoot,
+  deriveInstanceRootPath,
+  resolveInstancePath,
+  stripInstanceRoot,
   parseProjectorId,
   projectorIdToDwhSymbol,
   SITE_TREE_SYMBOL,
@@ -175,6 +181,7 @@ export {
   normalizeMountResult,
   mountResolvedProjector,
   denyRendererBoundary,
+  errorRendererBoundary,
   destroyRendererBoundary,
   parseActionRef,
   validateActionRecord,
