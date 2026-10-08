@@ -318,7 +318,9 @@ async function mountResolvedProjector(
 
   const generation = createGeneration(state, projectorId);
 
-  await supersedeCurrent(boundary, state, onError);
+  if (state.current) {
+    await supersedeCurrent(boundary, state, onError);
+  }
 
   state.current = generation;
   transitionBoundary(boundary, state, 'loading');
