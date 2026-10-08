@@ -5,6 +5,7 @@ import {
   assertDwhSymbol,
   normalizeDwhProjectionEnvelope,
   createDwhAdapter,
+  createHttpDwhAdapter,
   projectDwhSymbol,
 } from '../webengine.js';
 
@@ -50,4 +51,50 @@ test('projects symbols only through the injected DWH adapter', async () => {
   const result = await projectDwhSymbol(adapter, '#SITE', { domain: 'site' });
   assert.deepEqual(calls, [{ symbol: '#SITE', context: { domain: 'site' } }]);
   assert.deepEqual(result.data, { ok: true });
+});
+
+
+test('HTTP DWH adapter posts exact symbol and context payload', async () => {
+  const calls = [];
+  const adapter = createHttpDwhAdapter({
+    endpoint: '/app/dwh/api/project.php',
+    fetchImpl: async (endpoint, options) => {
+      calls.push({ endpoint, options });
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return { symbol: '#SITE', data: { id: 'root', label: 'Root', children: [] } };
+        },
+      };
+    },
+  });
+
+  const result = await projectDwhSymbol(adapter, '#SITE', { surface: 'site' });
+
+  assert.equal(result.symbol, '#SITE');
+  assert.equal(calls[0].endpoint, '/app/dwh/api/project.php');
+  assert.equal(calls[0].options.method, 'POST');
+  assert.deepEqual(JSON.parse(calls[0].options.body), {
+    symbol: '#SITE',
+    context: { surface: 'site' },
+  });
+});
+
+test('HTTP DWH adapter fails closed on non-OK response', async () => {
+  const adapter = createHttpDwhAdapter({
+    endpoint: '/app/dwh/api/project.php',
+    fetchImpl: async () => ({
+      ok: false,
+      status: 404,
+      async json() {
+        return { ok: false, error: 'projection_not_found' };
+      },
+    }),
+  });
+
+  await assert.rejects(
+    () => projectDwhSymbol(adapter, '#SITE'),
+    /HTTP 404 projection_not_found/,
+  );
 });
