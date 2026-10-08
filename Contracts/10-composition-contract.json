@@ -1,6 +1,6 @@
 {
   "name": "Composition",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "owner": "WebEngine",
   "purpose": "execute a DWH-declared composition graph in the browser while preserving separate authority for hierarchy, declarations, authorization and renderer state",
   "pageContext": {
@@ -68,7 +68,10 @@
     "Composition does not execute domain business semantics directly",
     "Composition does not infer authorization from visibility or runtime state",
     "IAM identity and AccessCore authorization adapters remain separate authority integrations",
-    "routing/page context is descriptive runtime context, not an authorization boundary"
+    "routing/page context is descriptive runtime context, not an authorization boundary",
+    "#WEB is the canonical nanoCMS web-structure projection consumed by Composition",
+    "#SITE is derived navigation/SiteTree context from the same nanoCMS structure and must agree on Page identity",
+    "Composition does not introduce a #PAGE namespace or separate Site/Section/Menu/Navigation authority"
   ],
   "authority": {
     "DWH": [
@@ -85,6 +88,37 @@
       "mount/unmount lifecycle",
       "DOM/S3D orchestration",
       "failure isolation"
+    ]
+  },
+  "nanoCMS": {
+    "canonicalNamespace": "#WEB",
+    "semanticStructure": "nanoCMSStructure recursive Page + placements",
+    "dwhConsumer": [
+      "loadWebPage({ dwh, path, context })",
+      "composeWebPage(options)"
+    ],
+    "pageProjection": {
+      "fields": [
+        "page",
+        "children",
+        "placements"
+      ],
+      "page": [
+        "id",
+        "title",
+        "menuitem",
+        "description"
+      ],
+      "currentPlacementKinds": [
+        "projector"
+      ]
+    },
+    "execution": [
+      "strip physical instance root from currentPath",
+      "resolve #WEB with logical path context",
+      "require #WEB Page identity to match #SITE current node",
+      "resolve ordered projector placements through #PROJECTOR:*",
+      "mount each projector through renderer lifecycle"
     ]
   }
 }
