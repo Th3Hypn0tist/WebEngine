@@ -1,6 +1,6 @@
 {
   "package": "webengine-contracts",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "files": [
     "00-engine-contract.json",
     "01-domain-layout.json",
@@ -17,6 +17,7 @@
     "12-accesscore-preflight-contract.json",
     "13-instance-root-contract.json",
     "14-dwh-consumer-contract.json",
+    "15-metamodule-catalog-contract.json",
     "manifest.json"
   ],
   "status": "active"
