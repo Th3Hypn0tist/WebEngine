@@ -1,7 +1,7 @@
 {
   "name": "Content",
-  "version": "0.2.0",
-  "owner": "WebEngine",
+  "version": "0.3.0",
+  "owner": "DWH (content identity/bindings) / WebEngine (runtime presentation resolution)",
   "identity": [
     "domain",
     "id"
@@ -91,15 +91,25 @@
     "resolveContent(record, registry, context)"
   ],
   "rules": [
-    "WebEngine owns the Content subsystem contract, lookup and resolver lifecycle",
-    "Content persistence backend is not fixed by this runtime step",
+    "canonical Content identity and relations are DWH authority",
+    "WebEngine consumes projected Content records and does not become persistence or relation authority",
     "Content is page/site content only",
-    "Content does not own navigation items or navigation labels",
-    "Content does not own actions, buttons or action labels",
-    "Content does not own page layout, routing or domain behavior",
-    "type describes presentation semantics; provider describes source resolution",
-    "projectors reference canonical content identity instead of physical paths or provider-specific URLs",
-    "all content for one domain can be addressed as one namespace",
-    "resolved Content descriptors are presentation inputs and do not become source authority"
-  ]
+    "Content does not own navigation hierarchy or action execution",
+    "type describes presentation semantics; provider describes runtime source resolution",
+    "resolved Content descriptors are runtime presentation inputs and never source authority",
+    "provider failure does not cause WebEngine to invent canonical fallback content"
+  ],
+  "authority": {
+    "DWH": [
+      "content identity",
+      "content declarative data",
+      "content-to-page/section/projector relations",
+      "provider/source binding declarations"
+    ],
+    "WebEngine": [
+      "content projection validation",
+      "provider adapter execution",
+      "presentation descriptor normalization"
+    ]
+  }
 }
