@@ -37,19 +37,18 @@ WebEngine owns execution semantics, not declarative authority.
 
 ## What DWH owns
 
-DWH is the canonical authority for declarative website structure, including:
+Canonical human/web structure is the Expose.nanoCMS `#WEB` projection over recursive nanoCMSStructure Page + placements. DWH is the relational/projection authority that resolves this structure together with Content, Projector and Action declarations.
 
 ```text
-site hierarchy
-content identity and content relations
-projector definitions and bindings
-renderer bindings
-route declarations
-composition graph
-action declarations
-ordering
-semantic symbols and deterministic projections
+#WEB                 resolved Page + children(context) + placements
+#SITE                derived SiteTree/navigation projection
+#PROJECTOR:*         effective projector + explicit renderer binding
+#CONTENT:*           canonical content declaration
+#ACTION:*            canonical action declaration
+#METAMODULE:CATALOG  MetaModule browse/coverage projection
 ```
+
+There is no separate Site/Section/Menu/Navigation semantic authority and no `#PAGE` namespace. Recursive Page + placements already expresses that structure.
 
 WebEngine consumes these declarations through semantic DWH projections. It must not duplicate them as a second canonical model.
 
@@ -123,18 +122,32 @@ Transport does not define symbol semantics; the same adapter carries `#SITE`, `#
 
 A DWH projection response identifies the symbol it satisfies and carries the projected data. Symbol mismatch or dependency failure is an error; WebEngine does not invent a second canonical source.
 
-## SiteTree
+## nanoCMS / #WEB
 
-The canonical site hierarchy is owned by DWH and exposed initially as:
+Canonical human/web composition uses the reserved Expose.nanoCMS namespace root:
 
 ```text
-#SITE
+#WEB
 ```
+
+`#WEB` resolves one context-specific Page projection by logical path. The source semantics are recursive nanoCMSStructure Page + children(context) + placements. WebEngine validates the resolved Page, resolves ordered projector placements and executes them.
+
+```text
+nanoCMSStructure
+      ├── #WEB(path) -> Page + placements -> WebEngine composition
+      └── #SITE      -> derived SiteTree/navigation
+```
+
+Physical deployment prefixes such as `/test/` never enter the logical Page identity or `#WEB` path context.
+
+## SiteTree
+
+`#SITE` is the derived SiteTree/navigation projection from the same nanoCMS structure authority:
 
 Authority flow:
 
 ```text
-DWH entities + relations
+nanoCMSStructure Page + children
         ↓
       #SITE
         ↓
