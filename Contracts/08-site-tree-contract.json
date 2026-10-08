@@ -1,11 +1,12 @@
 {
   "name": "SiteTree",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "owner": "WebEngine",
   "kind": "DWH SiteTree projection consumer mechanism",
   "canonicalSource": {
     "authority": "DWH",
-    "symbol": "#SITE"
+    "symbol": "#SITE",
+    "derivedFrom": "nanoCMSStructure recursive Page + placements under #WEB"
   },
   "purpose": "consume the DWH #SITE projection, validate it and expose deterministic SiteTree runtime lookup and derived projection mechanisms",
   "ownership": {
@@ -66,6 +67,7 @@
     "API and service routing remain separate machine-interface concerns",
     "SiteTree must not infer authorization from hierarchy, paths or visibility",
     "SiteTree node paths remain logical root paths and do not embed the active deployment prefix",
-    "HTTP transport is replaceable consumer plumbing and does not become SiteTree authority"
+    "HTTP transport is replaceable consumer plumbing and does not become SiteTree authority",
+    "#SITE and #WEB must derive from one nanoCMS structure authority rather than separate hierarchy stores"
   ]
 }
