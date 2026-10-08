@@ -1,6 +1,6 @@
 {
   "name": "Content",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "owner": "DWH (content identity/bindings) / WebEngine (runtime presentation resolution)",
   "identity": [
     "domain",
@@ -81,6 +81,8 @@
     "file": "generic file resource"
   },
   "runtimeHelpers": [
+    "contentIdToDwhSymbol(domain, id)",
+    "loadContentDeclaration(options)",
     "validateContentRecord(record)",
     "freezeContentRecord(record)",
     "createContentProviderRegistry()",
@@ -111,5 +113,13 @@
       "provider adapter execution",
       "presentation descriptor normalization"
     ]
+  },
+  "dwhProjection": {
+    "symbolGrammar": "#CONTENT:<DOMAIN>:<ID>",
+    "consumerApi": [
+      "contentIdToDwhSymbol(domain, id)",
+      "loadContentDeclaration({ dwh, domain, id, context })"
+    ],
+    "rule": "canonical declaration is loaded from DWH before provider/runtime resolution; WebEngine has no file fallback"
   }
 }
