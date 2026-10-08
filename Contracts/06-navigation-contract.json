@@ -1,10 +1,10 @@
 {
   "name": "Navigation",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "owner": "WebEngine",
   "kind": "derived SiteTree projection",
-  "sourceAuthority": "/site.json via the WebEngine SiteTree subsystem",
-  "purpose": "derive navigation and hierarchy presentations from canonical SiteTree truth without creating a second hierarchy authority",
+  "sourceAuthority": "DWH #SITE projection consumed by the WebEngine SiteTree runtime",
+  "purpose": "derive runtime navigation presentation from the validated DWH #SITE projection without creating a second hierarchy authority",
   "projectionRecord": {
     "fields": [
       "id",
@@ -50,7 +50,7 @@
   "rules": [
     "Navigation is not an independent hierarchy authority",
     "navigation identity, labels, paths and parent-child structure come from SiteTree",
-    "Navigation must not duplicate a separately maintained tree beside /site.json",
+    "Navigation must not duplicate a separately maintained tree beside DWH #SITE",
     "projection records may be duplicated freely because they are not hierarchy authority",
     "active state is derived from current page/path context and is not canonical SiteTree instance data",
     "current section is derived from ancestry and is not stored separately",
@@ -58,6 +58,7 @@
     "Refresh and other page-data operations are not Navigation",
     "API and service routing are separate machine-interface concerns and are not derived from the public SiteTree hierarchy",
     "Navigation is not Content",
-    "Navigation projections do not infer authorization from hierarchy or visibility"
+    "Navigation projections do not infer authorization from hierarchy or visibility",
+    "DWH owns the canonical hierarchy relations; WebEngine owns only runtime derivation and presentation state"
   ]
 }
