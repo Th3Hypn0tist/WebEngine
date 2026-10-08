@@ -1,6 +1,6 @@
 {
   "package": "webengine-contracts",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "files": [
     "00-engine-contract.json",
     "01-domain-layout.json",
@@ -12,6 +12,7 @@
     "07-actions-contract.json",
     "08-site-tree-contract.json",
     "09-presentation-contract.json",
+    "10-composition-contract.json",
     "manifest.json"
   ],
   "status": "active"
