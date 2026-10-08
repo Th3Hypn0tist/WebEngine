@@ -1,24 +1,51 @@
 {
   "name": "Actions",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "WebEngine",
-  "purpose": "canonical user-triggered action declarations and presentation metadata",
+  "purpose": "canonical user-triggered action declarations, presentation metadata and binding to external domain action execution",
   "owns": [
     "action item identity",
     "action labels",
-    "binding from a presented control to a domain-defined action"
+    "binding from a presented control to a domain-defined action reference"
   ],
-  "minimumRecord": [
-    "id",
-    "label",
-    "action"
+  "record": {
+    "fields": [
+      "id",
+      "label",
+      "action"
+    ],
+    "actionGrammar": "DOMAIN:ACTION",
+    "rules": [
+      "id is presentation/action identity, not domain execution behavior",
+      "label is canonical action presentation text",
+      "action is the external domain action reference"
+    ]
+  },
+  "runtimeApi": [
+    "parseActionRef(action)",
+    "validateActionRecord(record)",
+    "freezeActionRecord(record)",
+    "createActionRegistry()",
+    "executeAction(record, executor, options)",
+    "bindActionControl(control, record, executor, options)"
   ],
+  "binding": {
+    "executor": "external function supplied by the owning domain/integration layer",
+    "WebEngineRole": "bind user intent and presentation metadata to the external action reference",
+    "mustNot": [
+      "implement domain business behavior",
+      "infer authorization from control visibility or disabled state",
+      "turn Navigation into Actions or Actions into Navigation"
+    ]
+  },
   "rules": [
     "actions are not Content",
     "button/action labels are owned by Actions",
     "Actions declares and binds user intent but does not own domain business behavior",
     "action execution belongs to the owning domain service",
     "authorization for an action/resource is decided by AccessCore when required",
-    "presentation visibility is not a security boundary"
+    "presentation visibility is not a security boundary",
+    "binding cleanup removes only the listener owned by that binding",
+    "action executor failure does not mutate the canonical Action record"
   ]
 }
