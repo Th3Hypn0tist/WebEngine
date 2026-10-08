@@ -11,10 +11,11 @@ import {
 test('accepts canonical DWH symbols', () => {
   assert.equal(assertDwhSymbol('#SITE'), undefined);
   assert.equal(assertDwhSymbol('#CONTENT:HOME'), undefined);
+  assert.equal(assertDwhSymbol('#PROJECTOR:LMTS:ranking'), undefined);
 });
 
 test('rejects invalid DWH symbols', () => {
-  for (const value of ['SITE', '#site', '#', '', null]) {
+  for (const value of ['SITE', '#', '', null]) {
     assert.throws(() => assertDwhSymbol(value));
   }
 });
