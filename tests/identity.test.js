@@ -214,5 +214,5 @@ test('loads IAM identity from the active instance root', async () => {
     },
   });
 
-  assert.equal(calls[0][0], '/test/iam/api/me.php?domain=lmts');
+  assert.equal(calls[0][0], '/test/app/iam/api/me.php?domain=lmts');
 });
