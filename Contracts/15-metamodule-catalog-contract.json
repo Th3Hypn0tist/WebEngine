@@ -1,0 +1,20 @@
+{
+  "name": "WebEngine MetaModule Catalog Consumer",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "symbol": "#METAMODULE:CATALOG",
+  "purpose": "validate and consume the DWH MetaModule browse/coverage projection without creating canonical identity or registry authority in the browser",
+  "publicApi": [
+    "METAMODULE_CATALOG_SYMBOL",
+    "validateMetaModuleCatalog(data)",
+    "loadMetaModuleCatalog(adapter, context)"
+  ],
+  "rules": [
+    "catalog data is immutable runtime projection state",
+    "BusinessSuite, Strategy and Everyday grouping entries must remain NOT_EVENT_OWNER",
+    "display labels and unresolved entries remain unresolved in WebEngine",
+    "WebEngine must not mint or normalize canonical MetaModule IDs",
+    "catalog resolution failure is visible and has no hard-coded fallback catalog",
+    "mmdemo synthetic data is consumer/demo data and never canonical evidence"
+  ]
+}
