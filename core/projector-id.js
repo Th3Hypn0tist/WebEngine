@@ -1,3 +1,8 @@
+import {
+  INSTANCE_ROOT_PATH,
+  resolveInstancePath,
+} from './instance-root.js';
+
 const SEGMENT = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 
 function parseProjectorId(id) {
@@ -24,22 +29,37 @@ function parseProjectorId(id) {
   };
 }
 
-function resolveProjectorDefinitionUrls(id) {
+function resolveProjectorDefinitionUrls(
+  id,
+  {
+    instanceRoot = INSTANCE_ROOT_PATH,
+  } = {},
+) {
   const parsed = parseProjectorId(id);
-  const root = `/app/${parsed.pathDomain}/projectors/${parsed.pathProjector}`;
-  const urls = [`${root}.json`];
+  const logicalRoot = `/app/${parsed.pathDomain}/projectors/${parsed.pathProjector}`;
+  const logicalUrls = [`${logicalRoot}.json`];
 
   parsed.pathVariants.forEach((_, index) => {
     const variantPath = parsed.pathVariants.slice(0, index + 1).join('/');
-    urls.push(`${root}/${variantPath}.json`);
+    logicalUrls.push(`${logicalRoot}/${variantPath}.json`);
   });
 
-  return urls;
+  return logicalUrls.map(url =>
+    resolveInstancePath(url, { instanceRoot })
+  );
 }
 
-function resolveDefaultRendererUrl(id) {
+function resolveDefaultRendererUrl(
+  id,
+  {
+    instanceRoot = INSTANCE_ROOT_PATH,
+  } = {},
+) {
   const parsed = parseProjectorId(id);
-  return `/app/${parsed.pathDomain}/renderers/${parsed.pathProjector}.js`;
+  return resolveInstancePath(
+    `/app/${parsed.pathDomain}/renderers/${parsed.pathProjector}.js`,
+    { instanceRoot },
+  );
 }
 
 export {
