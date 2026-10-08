@@ -246,13 +246,17 @@ async function resolveProjector(id, {
   fetch: fetchImpl = globalThis.fetch,
   context = createProjectorResolutionContext(),
   maxStructureDepth = 64,
+  instanceRoot,
 } = {}) {
   const parsed = parseProjectorId(id);
   const canonicalId = parsed.id;
   const leave = enterProjectorResolution(context, canonicalId);
 
   try {
-    const definitionUrls = resolveProjectorDefinitionUrls(canonicalId);
+    const definitionUrls = resolveProjectorDefinitionUrls(
+      canonicalId,
+      instanceRoot == null ? {} : { instanceRoot },
+    );
     let projection = {};
 
     for (const url of definitionUrls) {
