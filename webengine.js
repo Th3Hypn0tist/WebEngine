@@ -59,6 +59,8 @@ import {
   createInlineTextProvider,
   createAssetProvider,
   createEmbedProvider,
+  contentIdToDwhSymbol,
+  loadContentDeclaration,
   resolveContent,
 } from './core/content.js';
 
@@ -86,6 +88,8 @@ import {
   validateActionRecord,
   freezeActionRecord,
   createActionRegistry,
+  actionIdToDwhSymbol,
+  loadActionDeclaration,
   executeAction,
   bindActionControl,
 } from './core/actions.js';
@@ -117,7 +121,7 @@ import {
   preflightProjectorAccess,
 } from './core/access.js';
 
-const WEBENGINE_VERSION = '0.14.0';
+const WEBENGINE_VERSION = '0.15.0';
 
 export {
   WEBENGINE_VERSION,
@@ -157,6 +161,8 @@ export {
   createInlineTextProvider,
   createAssetProvider,
   createEmbedProvider,
+  contentIdToDwhSymbol,
+  loadContentDeclaration,
   resolveContent,
   validateDeclarativeValue,
   validateProjectorProjection,
@@ -174,6 +180,8 @@ export {
   validateActionRecord,
   freezeActionRecord,
   createActionRegistry,
+  actionIdToDwhSymbol,
+  loadActionDeclaration,
   executeAction,
   bindActionControl,
   createPageContext,
