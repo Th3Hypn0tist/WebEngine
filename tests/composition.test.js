@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 
 import {
   createSiteTreeIndex,
+  createDwhAdapter,
+  WEB_SYMBOL,
+  validateWebPageProjection,
+  loadWebPage,
+  composeWebPage,
   createPageContext,
   createWebEngineShell,
   createProjectorSlot,
@@ -298,4 +303,158 @@ test('shell strips instance root for SiteTree lookup and restores it for links',
   assert.equal(shell.pageContext.currentPath, '/lmts/');
   assert.equal(shell.pageContext.currentNode.id, 'lmts');
   assert.equal(shell.globalNavigation.children[1].href, '/test/lmts/');
+});
+
+
+function mmdemoTree() {
+  return createSiteTreeIndex({
+    id: 'aigm',
+    label: 'AIGM.fi',
+    path: '/',
+    children: [
+      {
+        id: 'mmdemo',
+        label: 'MetaModule Demo',
+        path: '/mmdemo/',
+        children: [],
+      },
+    ],
+  });
+}
+
+function mmdemoWebProjection() {
+  return {
+    page: {
+      id: 'mmdemo',
+      title: 'MMDemo Industries Oy',
+      menuitem: 'MetaModule Demo',
+      description: 'Browsable MetaModule demo',
+    },
+    children: [],
+    placements: [
+      {
+        id: 'mmdemo.browser',
+        kind: 'projector',
+        order: 10,
+        ref: 'MMDemo:browser',
+        title: null,
+      },
+    ],
+  };
+}
+
+test('validates canonical #WEB resolved Page + placements projection', () => {
+  const value = mmdemoWebProjection();
+  assert.equal(validateWebPageProjection(value), true);
+
+  const bad = mmdemoWebProjection();
+  bad.placements[0].kind = 'invented';
+  assert.throws(
+    () => validateWebPageProjection(bad),
+    /unsupported #WEB placement kind/,
+  );
+});
+
+test('loads #WEB by logical path through the DWH adapter', async () => {
+  const calls = [];
+  const dwh = createDwhAdapter({
+    project: async (symbol, context) => {
+      calls.push({ symbol, context });
+      return {
+        symbol,
+        data: mmdemoWebProjection(),
+        revision: 'web-r1',
+      };
+    },
+  });
+
+  const result = await loadWebPage({
+    dwh,
+    path: '/mmdemo/',
+    context: { locale: 'fi' },
+  });
+
+  assert.equal(WEB_SYMBOL, '#WEB');
+  assert.equal(result.data.page.id, 'mmdemo');
+  assert.equal(result.revision, 'web-r1');
+  assert.deepEqual(calls, [{
+    symbol: '#WEB',
+    context: {
+      locale: 'fi',
+      path: '/mmdemo/',
+    },
+  }]);
+});
+
+test('composes a DWH-declared #WEB Page end-to-end under a relocatable instance root', async () => {
+  const document = createDocument();
+  const calls = [];
+
+  const dwh = createDwhAdapter({
+    project: async (symbol, context) => {
+      calls.push({ symbol, context });
+
+      if (symbol === '#WEB') {
+        return {
+          symbol,
+          data: mmdemoWebProjection(),
+          revision: 'web-r1',
+        };
+      }
+
+      if (symbol === '#PROJECTOR:MMDemo:browser') {
+        return {
+          symbol,
+          data: {
+            renderer: '/app/mmdemo/renderers/browser.js',
+            projection: {
+              heading: 'MetaModule Browser',
+            },
+          },
+          revision: 'projector-r1',
+        };
+      }
+
+      throw new Error(`unexpected symbol: ${symbol}`);
+    },
+  });
+
+  const result = await composeWebPage({
+    document,
+    dwh,
+    siteTree: mmdemoTree(),
+    currentPath: '/test/mmdemo/',
+    instanceRoot: '/test/',
+    dwhContext: {
+      locale: 'fi',
+    },
+    rendererOptions: {
+      importModule: async url => {
+        assert.equal(url, '/test/app/mmdemo/renderers/browser.js');
+
+        return {
+          mount(target, projection, context) {
+            target.textContent = projection.heading;
+            assert.equal(context.page.id, 'mmdemo');
+            assert.equal(context.placement.id, 'mmdemo.browser');
+          },
+        };
+      },
+    },
+  });
+
+  assert.equal(result.pageProjection.data.page.id, 'mmdemo');
+  assert.equal(result.composition.pageContext.currentPath, '/mmdemo/');
+  assert.equal(result.composition.titleNode.textContent, 'MMDemo Industries Oy');
+  assert.equal(result.placements.length, 1);
+  assert.equal(
+    result.placements[0].result.slot.boundary.children[0].textContent,
+    'MetaModule Browser',
+  );
+
+  assert.equal(calls[0].symbol, '#WEB');
+  assert.equal(calls[0].context.path, '/mmdemo/');
+  assert.equal(calls[1].symbol, '#PROJECTOR:MMDemo:browser');
+  assert.equal(calls[1].context.page, '/mmdemo/');
+  assert.equal(calls[1].context.placement, 'mmdemo.browser');
 });
