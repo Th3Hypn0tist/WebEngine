@@ -31,6 +31,15 @@ import {
 } from './core/dwh.js';
 
 import {
+  METAMODULE_CATALOG_SYMBOL,
+  IDENTITY_STATUSES,
+  STRUCTURE_STATUSES,
+  EVENT_STATUSES,
+  validateMetaModuleCatalog,
+  loadMetaModuleCatalog,
+} from './core/metamodule-catalog.js';
+
+import {
   projectGlobalNavigation,
   projectLocalNavigation,
   projectBreadcrumbs,
@@ -107,7 +116,7 @@ import {
   preflightProjectorAccess,
 } from './core/access.js';
 
-const WEBENGINE_VERSION = '0.12.0';
+const WEBENGINE_VERSION = '0.13.0';
 
 export {
   WEBENGINE_VERSION,
@@ -125,6 +134,12 @@ export {
   normalizeDwhProjectionEnvelope,
   createDwhAdapter,
   projectDwhSymbol,
+  METAMODULE_CATALOG_SYMBOL,
+  IDENTITY_STATUSES,
+  STRUCTURE_STATUSES,
+  EVENT_STATUSES,
+  validateMetaModuleCatalog,
+  loadMetaModuleCatalog,
   projectGlobalNavigation,
   projectLocalNavigation,
   projectBreadcrumbs,
