@@ -5,7 +5,6 @@ import {
 
 import {
   parseProjectorId,
-  resolveDefaultRendererUrl,
 } from './projector-id.js';
 
 const BOUNDARY_STATE = new WeakMap();
@@ -101,27 +100,26 @@ function validateRendererModuleUrl(
 }
 
 function resolveRendererModuleUrl(projectorId, {
-  override = null,
+  binding,
   instanceRoot = INSTANCE_ROOT_PATH,
 } = {}) {
-  parseProjectorId(projectorId);
+  const parsed = parseProjectorId(projectorId);
 
-  if (override == null) {
-    return resolveDefaultRendererUrl(projectorId, { instanceRoot });
+  if (typeof binding !== 'string' || !binding || binding !== binding.trim()) {
+    throw new TypeError('renderer binding must be a non-empty logical root-relative path');
   }
 
-  const parsed = parseProjectorId(projectorId);
   const logicalPrefix = `/app/${parsed.pathDomain}/renderers/`;
 
-  if (!override.startsWith(logicalPrefix)) {
+  if (!binding.startsWith(logicalPrefix)) {
     throw new Error(
-      `renderer override must remain inside the projector domain renderer root: ${logicalPrefix}`,
+      `renderer binding must remain inside the projector domain renderer root: ${logicalPrefix}`,
     );
   }
 
-  const physicalOverride = resolveInstancePath(override, { instanceRoot });
+  const physicalBinding = resolveInstancePath(binding, { instanceRoot });
   return validateRendererModuleUrl(
-    physicalOverride,
+    physicalBinding,
     projectorId,
     { instanceRoot },
   );
@@ -303,7 +301,8 @@ async function mountResolvedProjector(
     resolvedProjector == null ||
     typeof resolvedProjector !== 'object' ||
     typeof resolvedProjector.id !== 'string' ||
-    !Object.hasOwn(resolvedProjector, 'projection')
+    !Object.hasOwn(resolvedProjector, 'projection') ||
+    typeof resolvedProjector.renderer !== 'string'
   ) {
     throw new TypeError(
       'mountResolvedProjector requires a resolved projector with id and projection',
@@ -311,8 +310,9 @@ async function mountResolvedProjector(
   }
 
   const projectorId = parseProjectorId(resolvedProjector.id).id;
+  const binding = rendererUrl ?? resolvedProjector.renderer;
   const moduleUrl = resolveRendererModuleUrl(projectorId, {
-    override: rendererUrl,
+    binding,
     instanceRoot,
   });
 
