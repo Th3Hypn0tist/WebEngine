@@ -1,6 +1,6 @@
 {
   "name": "Identity and Access Integration",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "identityAuthority": "IAM",
   "authorizationAuthority": "AccessCore",
   "identityContext": {
@@ -8,27 +8,28 @@
     "contract": "Contracts/11-identity-context-contract.json",
     "rule": "WebEngine supplies normalized IAM identity context but does not authenticate credentials or own session state"
   },
-  "accessCoreDecision": {
-    "input": [
-      "subject",
-      "action",
-      "resource",
-      "context"
-    ],
-    "output": "allow | deny"
+  "accessCorePreflight": {
+    "adapter": "createAccessCoreAdapter({ check })",
+    "contract": "Contracts/12-accesscore-preflight-contract.json",
+    "canonicalDecision": "(subject, action, resource, context) -> allow | deny",
+    "transport": "dependency-injected; no HTTP endpoint invented by WebEngine"
   },
   "webEngineRole": [
     "load and normalize available IAM identity context",
     "preserve anonymous identity separately from authorization denial",
-    "request an AccessCore decision when a projection or action requires authorization",
-    "mount or withhold the projection according to the AccessCore decision"
+    "project IAM identity into an AccessCore subject without IAM management-tier authority leakage",
+    "request an AccessCore decision using explicit domain-owned action/resource semantics",
+    "mount renderer on allow",
+    "publish denied without renderer mount on deny",
+    "publish error on adapter/preflight failure"
   ],
   "mustNot": [
     "implement IAM authentication or session authority",
     "persist passwords or raw IAM session/bearer tokens",
     "translate IAM management tier into application permissions",
     "implement AccessCore authorization policy",
+    "derive action or resource semantics from projector identity",
     "infer permissions from UI state",
-    "treat a hidden projector as a service-side security boundary"
+    "treat projector preflight as the service-side enforcement boundary"
   ]
 }
