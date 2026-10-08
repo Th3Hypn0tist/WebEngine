@@ -1,6 +1,6 @@
 {
   "name": "Relocatable Instance Root",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "owner": "WebEngine",
   "purpose": "allow WebEngine code and physical domain resources to run under a temporary prefix such as /test/ and later move to the domain root without changing canonical logical paths",
   "canonicalLogicalRoot": "/",
@@ -12,14 +12,12 @@
   "logicalVsPhysical": {
     "logical": [
       "/app/iam/api/me.php",
-      "/app/lmts/projectors/ranking.json",
       "/app/lmts/renderers/ranking.js",
       "/iam/",
       "/lmts/"
     ],
     "physicalTest": [
       "/test/app/iam/api/me.php",
-      "/test/app/lmts/projectors/ranking.json",
       "/test/app/lmts/renderers/ranking.js",
       "/test/iam/",
       "/test/lmts/"
@@ -32,7 +30,6 @@
     "stripInstanceRoot(publicPath, options)"
   ],
   "consumers": [
-    "projector definition resolver",
     "renderer module resolver",
     "IAM identity adapter",
     "root-relative Content asset providers",
@@ -51,6 +48,7 @@
     "instance-root projection must not permit path traversal or cross-origin path injection",
     "existing production surfaces remain untouched until explicit cutover",
     "IAM and LMTS implementation roots live under /app/iam/ and /app/lmts/; /iam/ and /lmts/ are public projections",
-    "#SITE is resolved through the DWH consumer boundary and is independent of physical instance-root file placement"
+    "#SITE is resolved through the DWH consumer boundary and is independent of physical instance-root file placement",
+    "DWH semantic symbols and declarative website projections are not instance-root filesystem resources"
   ]
 }
