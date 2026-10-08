@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import {
   createSiteTreeIndex,
   createPageContext,
-  createNavigationElement,
   createWebEngineShell,
   createProjectorSlot,
   mountProjectorSlot,
@@ -135,27 +134,15 @@ test('shell emits only canonical WebEngine structural presentation classes', () 
   assert.ok(lmtsLink.classList.contains('we-nav-item'));
   assert.equal(lmtsLink.href, '/lmts/');
   assert.equal(lmtsLink.getAttribute('aria-current'), 'page');
-});
 
-test('navigation renders unaddressable breadcrumb nodes without inventing hrefs', () => {
-  const document = createDocument();
-  const nav = createNavigationElement(
+  const nested = createWebEngineShell({
     document,
-    [
-      { id: 'root', label: 'Root' },
-      { id: 'page', label: 'Page', path: '/page/' },
-    ],
-    {
-      currentId: 'page',
-      label: 'Breadcrumb',
-    },
-  );
-
-  assert.equal(nav.children[0].tagName, 'SPAN');
-  assert.equal(nav.children[0].href, '');
-  assert.equal(nav.children[1].tagName, 'A');
-  assert.equal(nav.children[1].href, '/page/');
-  assert.equal(nav.children[1].getAttribute('aria-current'), 'page');
+    siteTree: tree(),
+    currentPath: '/aigmos/expose/',
+  });
+  assert.equal(nested.breadcrumbs.children[0].tagName, 'SPAN');
+  assert.equal(nested.breadcrumbs.children[0].href, '');
+  assert.equal(nested.breadcrumbs.children.at(-1).getAttribute('aria-current'), 'page');
 });
 
 test('projector slot keeps heading outside renderer-owned live boundary', () => {
