@@ -64,6 +64,7 @@ function identity(tier = 1337) {
 function resolved() {
   return Object.freeze({
     id: 'LMTS:ranking',
+    renderer: '/app/lmts/renderers/ranking.js',
     projection: Object.freeze({
       title: 'Ranking',
     }),
