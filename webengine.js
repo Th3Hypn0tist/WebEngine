@@ -1,4 +1,13 @@
 import {
+  WEBENGINE_DEPLOY_MARKER,
+  INSTANCE_ROOT_PATH,
+  normalizeInstanceRoot,
+  deriveInstanceRootPath,
+  resolveInstancePath,
+  stripInstanceRoot,
+} from './core/instance-root.js';
+
+import {
   parseProjectorId,
   resolveProjectorDefinitionUrls,
   resolveDefaultRendererUrl,
@@ -92,7 +101,7 @@ import {
   preflightProjectorAccess,
 } from './core/access.js';
 
-const WEBENGINE_VERSION = '0.9.0';
+const WEBENGINE_VERSION = '0.10.0';
 
 export {
   WEBENGINE_VERSION,
