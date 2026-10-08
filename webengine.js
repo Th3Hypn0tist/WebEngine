@@ -14,7 +14,7 @@ import {
 } from './core/projector-id.js';
 
 import {
-  SITE_TREE_URL,
+  SITE_TREE_SYMBOL,
   parseSiteTree,
   validateSiteTree,
   createSiteTreeIndex,
@@ -22,6 +22,14 @@ import {
   resolveSiteNodeByPath,
   loadSiteTree,
 } from './core/site-tree.js';
+
+import {
+  DWH_SYMBOL_PATTERN,
+  assertDwhSymbol,
+  normalizeDwhProjectionEnvelope,
+  createDwhAdapter,
+  projectDwhSymbol,
+} from './core/dwh.js';
 
 import {
   projectGlobalNavigation,
@@ -101,20 +109,25 @@ import {
   preflightProjectorAccess,
 } from './core/access.js';
 
-const WEBENGINE_VERSION = '0.10.0';
+const WEBENGINE_VERSION = '0.11.0';
 
 export {
   WEBENGINE_VERSION,
   parseProjectorId,
   resolveProjectorDefinitionUrls,
   resolveDefaultRendererUrl,
-  SITE_TREE_URL,
+  SITE_TREE_SYMBOL,
   parseSiteTree,
   validateSiteTree,
   createSiteTreeIndex,
   resolveSiteNodeById,
   resolveSiteNodeByPath,
   loadSiteTree,
+  DWH_SYMBOL_PATTERN,
+  assertDwhSymbol,
+  normalizeDwhProjectionEnvelope,
+  createDwhAdapter,
+  projectDwhSymbol,
   projectGlobalNavigation,
   projectLocalNavigation,
   projectBreadcrumbs,
