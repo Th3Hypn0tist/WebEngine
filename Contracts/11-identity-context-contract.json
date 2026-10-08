@@ -1,12 +1,12 @@
 {
   "name": "IAM Identity Context",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "WebEngine",
   "identityAuthority": "IAM",
   "verifiedAgainst": {
     "contract": "iam.light",
     "version": "1.1",
-    "endpoint": "/iam/api/me.php?domain=<domain>"
+    "endpoint": "/app/iam/api/me.php?domain=<domain>"
   },
   "purpose": "adapt authenticated IAM session identity into a small immutable WebEngine runtime context without becoming an identity or authorization authority",
   "runtimeApi": [
@@ -21,7 +21,7 @@
   },
   "sessionTransport": {
     "browser": "same-origin Secure/HttpOnly IAM session cookie",
-    "fetch": "GET /iam/api/me.php?domain=<domain> with credentials=same-origin and cache=no-store",
+    "fetch": "GET <instance-root>/app/iam/api/me.php?domain=<domain> with credentials=same-origin and cache=no-store",
     "rule": "session token is not copied into WebEngine identity context"
   },
   "authenticatedContext": {
@@ -72,8 +72,8 @@
     ]
   },
   "failure": {
-    "401": "anonymous context",
     "400": "adapter/domain error",
+    "401": "anonymous context",
     "403": "authenticated session lacks requested IAM domain membership; adapter error, not application authorization result",
     "5xx": "IAM service failure",
     "malformedSuccess": "fail closed; do not invent identity"
@@ -85,6 +85,7 @@
     "identity context is immutable runtime data, not canonical IAM state",
     "IAM management tiers are user-management claims only",
     "application permissions belong to AccessCore",
-    "UI identity state is not a backend security boundary"
+    "UI identity state is not a backend security boundary",
+    "the public /iam/ projection is separate from the canonical /app/iam/ machine-interface root"
   ]
 }
