@@ -94,6 +94,7 @@ function resolved(
 ) {
   return Object.freeze({
     id,
+    renderer: '/app/lmts/renderers/ranking.js',
     projection: Object.freeze({ ...projection }),
   });
 }
