@@ -281,3 +281,20 @@ test('destroyWebEngineComposition tears down all registered projector slots', as
     /has been destroyed/,
   );
 });
+
+
+test('shell strips instance root for SiteTree lookup and restores it for links', () => {
+  const document = createDocument();
+
+  const shell = createWebEngineShell({
+    document,
+    siteTree: tree(),
+    currentPath: '/test/lmts/',
+    instanceRoot: '/test/',
+    title: 'LMTS',
+  });
+
+  assert.equal(shell.pageContext.currentPath, '/lmts/');
+  assert.equal(shell.pageContext.currentNode.id, 'lmts');
+  assert.equal(shell.globalNavigation.children[1].href, '/test/lmts/');
+});
