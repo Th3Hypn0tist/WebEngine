@@ -1,4 +1,10 @@
 import {
+  INSTANCE_ROOT_PATH,
+  resolveInstancePath,
+  stripInstanceRoot,
+} from './instance-root.js';
+
+import {
   resolveSiteNodeByPath,
 } from './site-tree.js';
 
@@ -54,27 +60,39 @@ function detachedNode(node) {
   return Object.freeze(value);
 }
 
-function createPageContext(siteTree, currentPath) {
+function createPageContext(
+  siteTree,
+  currentPath,
+  {
+    instanceRoot = INSTANCE_ROOT_PATH,
+  } = {},
+) {
   if (typeof currentPath !== 'string' || !currentPath) {
     throw new TypeError('page currentPath must be a non-empty string');
   }
 
-  const current = resolveSiteNodeByPath(siteTree, currentPath);
+  const logicalPath = stripInstanceRoot(currentPath, { instanceRoot });
+  if (logicalPath == null) {
+    throw new Error('page currentPath is outside the current WebEngine instance root');
+  }
+
+  const current = resolveSiteNodeByPath(siteTree, logicalPath);
 
   return Object.freeze({
-    currentPath,
+    currentPath: logicalPath,
     currentNode: detachedNode(current),
-    currentSection: resolveCurrentSection(siteTree, currentPath),
+    currentSection: resolveCurrentSection(siteTree, logicalPath),
     globalNavigation: projectGlobalNavigation(siteTree),
-    localNavigation: projectLocalNavigation(siteTree, currentPath),
-    breadcrumbs: projectBreadcrumbs(siteTree, currentPath),
-    activeNavigation: projectActiveNavigationState(siteTree, currentPath),
+    localNavigation: projectLocalNavigation(siteTree, logicalPath),
+    breadcrumbs: projectBreadcrumbs(siteTree, logicalPath),
+    activeNavigation: projectActiveNavigationState(siteTree, logicalPath),
   });
 }
 
 function createNavigationElement(document, items, {
   currentId = null,
   label,
+  instanceRoot = INSTANCE_ROOT_PATH,
 } = {}) {
   const nav = createElement(document, 'nav', 'we-nav');
 
@@ -91,9 +109,12 @@ function createNavigationElement(document, items, {
 
     if (item.path != null) {
       if ('href' in node) {
-        node.href = item.path;
+        node.href = resolveInstancePath(item.path, { instanceRoot });
       } else if (typeof node.setAttribute === 'function') {
-        node.setAttribute('href', item.path);
+        node.setAttribute(
+          'href',
+          resolveInstancePath(item.path, { instanceRoot }),
+        );
       }
     }
 
@@ -116,9 +137,14 @@ function createWebEngineShell({
   siteTree,
   currentPath,
   title = null,
+  instanceRoot = INSTANCE_ROOT_PATH,
 } = {}) {
   const dom = assertDocument(document);
-  const pageContext = createPageContext(siteTree, currentPath);
+  const pageContext = createPageContext(
+    siteTree,
+    currentPath,
+    { instanceRoot },
+  );
 
   if (title != null && (typeof title !== 'string' || title !== title.trim())) {
     throw new TypeError('page title must be a trimmed string or null');
@@ -135,6 +161,7 @@ function createWebEngineShell({
     {
       currentId: pageContext.currentNode?.id ?? null,
       label: 'Global',
+      instanceRoot,
     },
   );
 
@@ -153,6 +180,7 @@ function createWebEngineShell({
     {
       currentId: pageContext.currentNode?.id ?? null,
       label: 'Breadcrumb',
+      instanceRoot,
     },
   );
 
@@ -166,6 +194,7 @@ function createWebEngineShell({
     {
       currentId: pageContext.currentNode?.id ?? null,
       label: 'Local',
+      instanceRoot,
     },
   );
 
