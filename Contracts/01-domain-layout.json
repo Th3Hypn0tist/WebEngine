@@ -1,16 +1,18 @@
 {
   "domainRoot": "/app/<domain>/",
   "directories": {
-    "contracts": "canonical domain definitions",
+    "contracts": "canonical domain behavior/interface definitions",
     "services": "private domain behavior",
     "api": "public machine interface when explicitly exposed",
-    "renderers": "executable presentation implementations",
-    "projectors": "public declarative presentation definitions"
+    "renderers": "executable presentation implementations"
   },
+  "declarativeWebsiteAuthority": "DWH",
   "rules": [
-    "a public projector may require IAM authentication and/or AccessCore authorization",
+    "DWH owns projector declarations, content relations, route declarations, composition declarations and action declarations",
+    "a renderer is executable runtime code and may remain under the owning domain implementation root",
+    "a public surface may require IAM authentication and AccessCore authorization",
     "public does not mean anonymous",
     "services are not public presentation surfaces",
-    "a domain owns everything below its canonical domain root"
+    "domain implementation code owns behavior below its domain root; DWH owns cross-cutting declarative website relations"
   ]
 }
