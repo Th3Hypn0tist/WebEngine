@@ -188,6 +188,7 @@ test('returns empty when renderer explicitly reports empty', async () => {
 test('late async generation cannot overwrite a newer committed generation', async () => {
   const boundary = createBoundary();
   const gate = deferred();
+  const mountStarted = deferred();
   let staleDestroyCount = 0;
 
   const first = mountResolvedProjector(
@@ -197,6 +198,7 @@ test('late async generation cannot overwrite a newer committed generation', asyn
     {
       importModule: async () => ({
         async mount(target, projection) {
+          mountStarted.resolve();
           await gate.promise;
           target.textContent = projection.title;
           return {
@@ -209,7 +211,7 @@ test('late async generation cannot overwrite a newer committed generation', asyn
     },
   );
 
-  await Promise.resolve();
+  await mountStarted.promise;
 
   const second = await mountResolvedProjector(
     boundary,
