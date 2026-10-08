@@ -1,10 +1,11 @@
 {
   "name": "DWH Projection Consumer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "owner": "WebEngine",
   "purpose": "consume named DWH projections without coupling WebEngine to DWH storage, PHP implementation or relation internals",
   "publicApi": [
     "createDwhAdapter({ project })",
+    "createHttpDwhAdapter({ endpoint, fetchImpl })",
     "projectDwhSymbol(adapter, symbol, context)",
     "normalizeDwhProjectionEnvelope(value, expectedSymbol)",
     "loadMetaModuleCatalog(adapter, context)"
@@ -28,5 +29,17 @@
     "WebEngine does not invent fallback projections when DWH resolution fails",
     "#SITE and #METAMODULE:CATALOG are contracted DWH projections consumed by WebEngine",
     "case-sensitive symbol suffixes are preserved exactly"
-  ]
+  ],
+  "transport": {
+    "http": {
+      "adapter": "createHttpDwhAdapter",
+      "method": "POST",
+      "requestShape": [
+        "symbol",
+        "context"
+      ],
+      "response": "DWH projection envelope",
+      "rule": "HTTP transport is consumer plumbing only and does not define symbol semantics"
+    }
+  }
 }
