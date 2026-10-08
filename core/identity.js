@@ -3,7 +3,7 @@ import {
   resolveInstancePath,
 } from './instance-root.js';
 
-const IAM_IDENTITY_ENDPOINT = '/iam/api/me.php';
+const IAM_IDENTITY_ENDPOINT = '/app/iam/api/me.php';
 const IAM_IDENTITY_CONTRACT = 'iam.light';
 const IAM_IDENTITY_MAJOR_VERSION = '1';
 const IAM_AUTH_LEVEL = 'light';
