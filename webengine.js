@@ -73,7 +73,14 @@ import {
   destroyWebEngineComposition,
 } from './core/composition.js';
 
-const WEBENGINE_VERSION = '0.7.0';
+import {
+  IAM_IDENTITY_ENDPOINT,
+  normalizeIAMIdentityPayload,
+  createAnonymousIAMIdentityContext,
+  loadIAMIdentityContext,
+} from './core/identity.js';
+
+const WEBENGINE_VERSION = '0.8.0';
 
 export {
   WEBENGINE_VERSION,
@@ -128,4 +135,8 @@ export {
   mountProjectorSlot,
   composeProjector,
   destroyWebEngineComposition,
+  IAM_IDENTITY_ENDPOINT,
+  normalizeIAMIdentityPayload,
+  createAnonymousIAMIdentityContext,
+  loadIAMIdentityContext,
 };
