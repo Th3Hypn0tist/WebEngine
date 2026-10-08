@@ -1,0 +1,73 @@
+{
+  "name": "Composition",
+  "version": "0.1.0",
+  "owner": "WebEngine",
+  "purpose": "compose shared shell, page context, Navigation projections and isolated projector slots without creating new authorities for hierarchy, domain behavior or renderer state",
+  "pageContext": {
+    "function": "createPageContext(siteTree, currentPath)",
+    "fields": [
+      "currentPath",
+      "currentNode",
+      "currentSection",
+      "globalNavigation",
+      "localNavigation",
+      "breadcrumbs",
+      "activeNavigation"
+    ],
+    "authority": "all hierarchy-derived fields are detached projections from canonical SiteTree truth"
+  },
+  "shell": {
+    "function": "createWebEngineShell(options)",
+    "structure": [
+      ".we-shell",
+      ".we-header",
+      ".we-main",
+      ".we-page"
+    ],
+    "navigation": ".we-nav with .we-nav-item children derived from Navigation projections",
+    "rules": [
+      "addressable navigation items render as links using canonical SiteTree paths",
+      "unaddressable structural navigation items do not invent href values",
+      "aria-current=page marks only the exact current addressable item",
+      "shell composition uses only public .we-* presentation semantics"
+    ]
+  },
+  "projectorSlots": {
+    "functions": [
+      "createProjectorSlot(composition, resolvedProjector, options)",
+      "mountProjectorSlot(slot, resolvedProjector, context, options)",
+      "composeProjector(composition, resolvedProjector, context, options)"
+    ],
+    "structure": [
+      ".we-section",
+      ".we-projector-header when present",
+      ".we-projector"
+    ],
+    "rules": [
+      "slot identity is bound to one canonical resolved projector id",
+      "renderer mount cannot silently replace slot projector identity",
+      "projector heading remains outside renderer-owned live boundary",
+      "renderer lifecycle and state publication remain owned by the renderer runtime",
+      "one projector failure is contained to its own slot result and boundary"
+    ]
+  },
+  "destroy": {
+    "function": "destroyWebEngineComposition(composition, options)",
+    "semantics": [
+      "destroy all registered projector boundaries through renderer lifecycle cleanup",
+      "clear composition-owned slot registry",
+      "mark the composition terminal",
+      "remove composition-owned live DOM",
+      "reject new projector slots after composition destruction"
+    ]
+  },
+  "rules": [
+    "Composition consumes SiteTree and Navigation projections; it does not become hierarchy authority",
+    "Composition consumes resolved projectors; it does not become projector-definition authority",
+    "Composition delegates renderer lifecycle to the renderer subsystem",
+    "Composition does not execute Actions or domain business behavior",
+    "Composition does not infer authorization from visibility or DOM state",
+    "IAM identity and AccessCore authorization adapters are separate integration concerns",
+    "routing/page context is descriptive runtime context, not an authorization boundary"
+  ]
+}

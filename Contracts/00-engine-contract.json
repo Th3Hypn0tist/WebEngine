@@ -1,6 +1,6 @@
 {
   "name": "WebEngine",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "kind": "shared web application runtime",
   "runtime": "browser",
   "canonicalPublicEntry": "/lib/webengine/webengine.js",
@@ -13,9 +13,9 @@
     "Content subsystem",
     "SiteTree contract, parsing, validation, indexing, resolution and derived projections",
     "Navigation projection subsystem",
-    "Actions subsystem",
+    "Actions declaration and binding subsystem",
     "routing and page context",
-    "shared shell behavior",
+    "shared shell and page composition",
     "WebEngine application/composition presentation semantics under the .we-* namespace",
     "IAM identity context integration",
     "AccessCore authorization integration"
@@ -28,6 +28,8 @@
     "Content, SiteTree, Navigation projections and Actions remain separate concerns",
     "projectors are declarative definitions",
     "renderers are executable presentation implementations",
+    "shell/page composition consumes authorities without replacing them",
+    "Actions binds user intent to external domain action references without owning business behavior",
     "domain logic remains in the domain",
     "derived paths are not duplicated in contracts",
     "WebEngine owns presentation semantics while Style owns visual implementation"
@@ -40,6 +42,7 @@
     "reimplement WebGUI DOM primitives",
     "reimplement S3D spatial primitives",
     "be an authorization authority",
+    "execute domain business behavior inside the Actions subsystem",
     "store navigation or action semantics as Content",
     "create an independent navigation hierarchy beside SiteTree",
     "store AIGM.fi site instance data such as /site.json inside /lib/webengine/"

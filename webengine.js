@@ -55,7 +55,25 @@ import {
   destroyRendererBoundary,
 } from './core/renderer.js';
 
-const WEBENGINE_VERSION = '0.6.0';
+import {
+  parseActionRef,
+  validateActionRecord,
+  freezeActionRecord,
+  createActionRegistry,
+  executeAction,
+  bindActionControl,
+} from './core/actions.js';
+
+import {
+  createPageContext,
+  createWebEngineShell,
+  createProjectorSlot,
+  mountProjectorSlot,
+  composeProjector,
+  destroyWebEngineComposition,
+} from './core/composition.js';
+
+const WEBENGINE_VERSION = '0.7.0';
 
 export {
   WEBENGINE_VERSION,
@@ -98,4 +116,16 @@ export {
   mountResolvedProjector,
   denyRendererBoundary,
   destroyRendererBoundary,
+  parseActionRef,
+  validateActionRecord,
+  freezeActionRecord,
+  createActionRegistry,
+  executeAction,
+  bindActionControl,
+  createPageContext,
+  createWebEngineShell,
+  createProjectorSlot,
+  mountProjectorSlot,
+  composeProjector,
+  destroyWebEngineComposition,
 };
