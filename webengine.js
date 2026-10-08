@@ -9,8 +9,7 @@ import {
 
 import {
   parseProjectorId,
-  resolveProjectorDefinitionUrls,
-  resolveDefaultRendererUrl,
+  projectorIdToDwhSymbol,
 } from './core/projector-id.js';
 
 import {
@@ -54,10 +53,9 @@ import {
 } from './core/content.js';
 
 import {
-  validateProjectorDefinition,
-  parseProjectorDefinition,
-  mergeProjectorDelta,
-  loadProjectorDefinition,
+  validateDeclarativeValue,
+  validateProjectorProjection,
+  deepFreezeDeclarative,
   createProjectorResolutionContext,
   resolveProjector,
 } from './core/projector-resolver.js';
@@ -109,13 +107,12 @@ import {
   preflightProjectorAccess,
 } from './core/access.js';
 
-const WEBENGINE_VERSION = '0.11.0';
+const WEBENGINE_VERSION = '0.12.0';
 
 export {
   WEBENGINE_VERSION,
   parseProjectorId,
-  resolveProjectorDefinitionUrls,
-  resolveDefaultRendererUrl,
+  projectorIdToDwhSymbol,
   SITE_TREE_SYMBOL,
   parseSiteTree,
   validateSiteTree,
@@ -144,10 +141,9 @@ export {
   createAssetProvider,
   createEmbedProvider,
   resolveContent,
-  validateProjectorDefinition,
-  parseProjectorDefinition,
-  mergeProjectorDelta,
-  loadProjectorDefinition,
+  validateDeclarativeValue,
+  validateProjectorProjection,
+  deepFreezeDeclarative,
   createProjectorResolutionContext,
   resolveProjector,
   validateRendererModuleUrl,
