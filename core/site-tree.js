@@ -1,3 +1,8 @@
+import {
+  INSTANCE_ROOT_PATH,
+  resolveInstancePath,
+} from './instance-root.js';
+
 const SITE_TREE_URL = '/site.json';
 const NODE_KEYS = new Set(['id', 'label', 'path', 'children']);
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
@@ -95,10 +100,7 @@ function cloneNode(node) {
     children: Object.freeze((node.children ?? []).map(cloneNode)),
   };
 
-  if (node.path != null) {
-    clone.path = node.path;
-  }
-
+  if (node.path != null) clone.path = node.path;
   return Object.freeze(clone);
 }
 
@@ -111,12 +113,8 @@ function createSiteTreeIndex(root) {
 
   function index(node) {
     byId.set(node.id, node);
-    if (node.path != null) {
-      byPath.set(node.path, node);
-    }
-    for (const child of node.children) {
-      index(child);
-    }
+    if (node.path != null) byPath.set(node.path, node);
+    for (const child of node.children) index(child);
   }
 
   index(canonicalRoot);
@@ -150,24 +148,27 @@ function resolveSiteNodeByPath(siteTree, path) {
 }
 
 async function loadSiteTree({
-  url = SITE_TREE_URL,
+  url = null,
+  instanceRoot = INSTANCE_ROOT_PATH,
   fetch: fetchImpl = globalThis.fetch,
 } = {}) {
-  if (typeof url !== 'string' || !url) {
+  const resolvedUrl = url ?? resolveInstancePath(SITE_TREE_URL, { instanceRoot });
+
+  if (typeof resolvedUrl !== 'string' || !resolvedUrl) {
     throw new TypeError('site tree URL must be a non-empty string');
   }
   if (typeof fetchImpl !== 'function') {
     throw new TypeError('SiteTree loader requires a fetch implementation');
   }
 
-  const response = await fetchImpl(url);
+  const response = await fetchImpl(resolvedUrl);
 
   if (!response || typeof response.text !== 'function') {
     throw new TypeError('SiteTree fetch must return a Response-like object');
   }
   if (response.ok === false) {
     const status = Number.isInteger(response.status) ? ` HTTP ${response.status}` : '';
-    throw new Error(`failed to load SiteTree from ${url}:${status}`.replace(/:$/, ''));
+    throw new Error(`failed to load SiteTree from ${resolvedUrl}:${status}`.replace(/:$/, ''));
   }
 
   const source = await response.text();
