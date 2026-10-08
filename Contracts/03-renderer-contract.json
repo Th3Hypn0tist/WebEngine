@@ -1,19 +1,21 @@
 {
   "name": "Renderer Lifecycle",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "owner": "WebEngine",
-  "purpose": "define renderer resolution, isolated loading/mounting, generation-safe commit, mount-instance cleanup and projector-boundary lifecycle semantics",
+  "purpose": "validate, load and lifecycle-manage executable renderer modules selected by canonical DWH renderer bindings",
   "defaultResolution": {
-    "projector": "LMTS:ranking",
-    "renderer": "/app/lmts/renderers/ranking.js"
+    "authority": "DWH projection supplies renderer binding",
+    "exampleProjector": "LMTS:ranking",
+    "exampleRenderer": "/app/lmts/renderers/ranking.js"
   },
   "resolution": {
-    "default": "renderer URL is derived from the base projector id",
-    "override": "optional explicit trusted-orchestration override",
-    "overrideBoundary": "override must remain under /app/<projector-domain>/renderers/ and identify a .js module",
+    "source": "renderer binding supplied by the effective DWH/projector projection",
+    "validation": "binding must resolve to a trusted logical renderer module under the projector/domain renderer root",
+    "instanceRoot": "logical renderer path is projected through the active WebEngine instance root",
     "mustNot": [
-      "derive renderer path from DOM state",
-      "allow cross-domain renderer override",
+      "derive canonical renderer binding from DOM state",
+      "invent a renderer binding when DWH projection omits one",
+      "allow cross-domain renderer binding unless an explicit canonical contract permits it",
       "accept remote, query-bearing, fragment-bearing or traversal renderer URLs"
     ]
   },
@@ -122,12 +124,13 @@
     "diagnostics": "verbose failure details are emitted only through an optional diagnostic callback, never through shared presentation attributes"
   },
   "rules": [
-    "renderers are executable implementations outside the projector tree",
+    "DWH owns canonical renderer binding declarations",
+    "WebEngine owns renderer module loading and lifecycle execution",
+    "renderers are executable implementations and do not become declaration authority",
     "a renderer may use WebGUI, S3D or native browser capabilities",
-    "a renderer does not become the authority for domain data, authorization, SiteTree or Actions",
+    "a renderer does not become authority for domain data, authorization, SiteTree, Content, Projectors or Actions",
     "the same renderer module may be mounted concurrently in multiple independent projection instances",
     "a module-global destroy() that cannot identify a mount instance is not the canonical cleanup model",
-    "WebEngine owns lifecycle orchestration and state publication",
     "UI lifecycle state is not an authoritative backend security boundary"
   ]
 }
