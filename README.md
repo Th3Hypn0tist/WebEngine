@@ -4,7 +4,7 @@ Shared web application runtime for AIGM.fi.
 
 WebEngine composes public presentation surfaces from declarative projector contracts. It owns shared application behavior such as projector resolution, composition, renderer lifecycle, Content, SiteTree mechanisms, Navigation projections, Actions, routing/page context, shell behavior, IAM identity context and AccessCore authorization integration.
 
-WebEngine does **not** own domain business logic, visual styling, DOM primitives, spatial primitives, site-specific hierarchy instance data or authorization policy.
+WebEngine does **not** own domain business logic, visual styling, DOM primitives, spatial primitives, canonical website relations or authorization policy. Canonical website relations are owned by DWH.
 
 ## Dependency direction
 
@@ -32,15 +32,16 @@ WebEngine derives the active site instance root from its own canonical deploymen
 /lib/webengine/webengine.js      -> /
 ```
 
-Canonical site/domain data remains deployment-neutral:
+Canonical logical domain paths remain deployment-neutral:
 
 ```text
-/site.json
 /lmts/
 /app/lmts/projectors/ranking.json
 /app/lmts/renderers/ranking.js
 /app/iam/api/me.php
 ```
+
+Site hierarchy is no longer addressed as a file path. WebEngine requests the DWH symbol `#SITE`.
 
 At runtime those logical paths are projected through the active instance root.
 
@@ -48,7 +49,6 @@ Example test deployment:
 
 ```text
 /test/
-├── site.json
 ├── lib/
 │   ├── webengine/
 │   ├── webgui/
@@ -65,7 +65,6 @@ The exact same canonical data under production root becomes:
 
 ```text
 /
-├── site.json
 ├── lib/
 ├── style/
 ├── app/
@@ -75,9 +74,9 @@ The exact same canonical data under production root becomes:
 └── lmts/   # public projection
 ```
 
-No `/test` literal belongs in SiteTree, projector definitions, renderer paths, Content identities or domain code.
+No `/test` literal belongs in DWH symbols, SiteTree node paths, projector definitions, renderer paths, Content identities or domain code.
 
-The runtime applies the prefix to physical SiteTree/projector/renderer/IAM/asset requests and navigation links. Browser paths are stripped back to logical paths before SiteTree lookup.
+The runtime applies the prefix to physical projector/renderer/IAM/asset requests and navigation links. Browser paths are stripped back to logical paths before lookup in the validated SiteTree snapshot. DWH symbols such as `#SITE` are semantic identities and are independent of the physical instance root.
 
 Promotion from the test mirror to production therefore changes deployment root only.
 
@@ -87,13 +86,13 @@ Promotion from the test mirror to production therefore changes deployment root o
 /lib/webengine/webengine.js
 ```
 
-AIGM.fi site hierarchy instance data lives separately:
+AIGM.fi site hierarchy authority lives in DWH. WebEngine consumes the semantic DWH symbol:
 
 ```text
-/site.json
+#SITE
 ```
 
-`/site.json` is **not** part of the WebEngine library deployment. WebEngine owns the SiteTree contract and runtime mechanisms that parse, validate, index, resolve and project that instance data.
+WebEngine owns the DWH consumer boundary plus SiteTree validation, immutable indexing, exact resolution and derived runtime projections. It does not own the canonical website relation model.
 
 Domain runtime roots use:
 
@@ -178,7 +177,7 @@ Content
 = typed page/site content resources
 
 SiteTree
-= the canonical public site hierarchy mechanism over /site.json
+= the validated WebEngine runtime snapshot projected by DWH #SITE
 
 Navigation
 = derived SiteTree projections such as global/local navigation and breadcrumbs
@@ -189,21 +188,54 @@ Actions
 
 These concerns are intentionally separate.
 
-The public site hierarchy exists canonically once in `/site.json`. Navigation, breadcrumbs, sitemap, current section and active navigation state are derived projections of SiteTree; they are not separately maintained hierarchy authorities.
+The public site hierarchy exists canonically as DWH entities and explicit relations. `#SITE` projects that authority into the SiteTree shape consumed by WebEngine. Navigation, breadcrumbs, sitemap, current section and active navigation state are further derived projections; they are not separately maintained hierarchy authorities.
 
 Navigation labels come from SiteTree. Action/button labels are owned by Actions. Neither belongs in Content.
 
 API and service routing are separate machine-interface concerns and are not derived from the public SiteTree hierarchy.
 
-## SiteTree contract
+## DWH projection consumer
 
-Canonical instance:
+WebEngine consumes DWH by semantic symbol through a dependency-injected adapter:
 
-```text
-/site.json
+```js
+createDwhAdapter({ project })
+projectDwhSymbol(adapter, symbol, context)
 ```
 
-Current node shape:
+Canonical boundary:
+
+```text
+WebEngine
+    ↓ semantic symbol
+DWH projection interface
+    ↓
+canonical DWH entities + relations
+```
+
+WebEngine never queries DWH tables, SQL joins, PHP classes or persistence adapters directly. A DWH projection response carries an explicit `symbol` and `data`; a symbol mismatch is an error and failures do not trigger invented fallback data.
+
+The first consumed symbol is:
+
+```text
+#SITE
+```
+
+## SiteTree contract
+
+Canonical authority and runtime flow:
+
+```text
+DWH canonical entities + relations
+        ↓
+#SITE
+        ↓
+validated immutable SiteTree snapshot
+        ↓
+WebEngine derived projections
+```
+
+Current projected node shape:
 
 ```text
 id
@@ -215,24 +247,21 @@ children
 WebEngine owns:
 
 ```text
-SiteTree contract
-parser
-validator
-indexer
-resolver
+DWH #SITE consumer boundary
+SiteTree projection validation
+immutable index
+exact id/path resolver
 derived projection mechanisms
 ```
 
-The AIGM.fi instance owns the actual `/site.json` data.
+DWH owns the canonical website entities, relations, ordering and the `#SITE` projection semantics.
 
-
+`site.json` is not a canonical authority. JSON may be used as a transport serialization, but the semantic identity remains `#SITE`.
 
 ## SiteTree runtime API
 
-WebEngine exposes a small deterministic SiteTree runtime:
-
 ```js
-loadSiteTree()
+loadSiteTree({ dwh, context })
 parseSiteTree(source)
 validateSiteTree(root)
 createSiteTreeIndex(root)
@@ -240,19 +269,9 @@ resolveSiteNodeById(siteTree, id)
 resolveSiteNodeByPath(siteTree, path)
 ```
 
-Default loader target:
+`loadSiteTree()` requests `#SITE` through the supplied DWH adapter, validates the returned projection and creates an isolated frozen runtime snapshot. Invalid projection shape, duplicate IDs, duplicate paths, cycles or DWH failures reject instead of creating fallback hierarchy.
 
-```text
-/site.json
-```
-
-The runtime does not normalize or repair hierarchy identity. IDs and public paths resolve exactly as declared. Invalid JSON, invalid node shape, duplicate IDs, duplicate paths, cycles and fetch failures reject instead of creating fallback hierarchy.
-
-`createSiteTreeIndex()` creates an isolated frozen snapshot so later mutation of the source object cannot mutate the runtime hierarchy.
-
-This step implements SiteTree loading, parsing, validation, indexing and exact resolution only. Navigation, breadcrumbs and other SiteTree projections remain a separate layer.
-
-
+Current-path resolution remains exact. WebEngine does not lowercase paths, append or remove slashes, or infer hierarchy from URL strings.
 
 ## SiteTree projections
 
