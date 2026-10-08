@@ -40,3 +40,23 @@ test('rejects malformed ids', () => {
   assert.throws(() => parseProjectorId('LMTS:ranking:'));
   assert.throws(() => parseProjectorId('LMTS:rank ing'));
 });
+
+
+test('projects projector and renderer paths through a relocatable instance root', () => {
+  assert.deepEqual(
+    resolveProjectorDefinitionUrls('LMTS:ranking:top3', {
+      instanceRoot: '/test/',
+    }),
+    [
+      '/test/app/lmts/projectors/ranking.json',
+      '/test/app/lmts/projectors/ranking/top3.json',
+    ],
+  );
+
+  assert.equal(
+    resolveDefaultRendererUrl('LMTS:ranking', {
+      instanceRoot: '/test/',
+    }),
+    '/test/app/lmts/renderers/ranking.js',
+  );
+});
