@@ -1,6 +1,13 @@
 {
+  "name": "Identity and Access Integration",
+  "version": "0.2.0",
   "identityAuthority": "IAM",
   "authorizationAuthority": "AccessCore",
+  "identityContext": {
+    "adapter": "loadIAMIdentityContext(options)",
+    "contract": "Contracts/11-identity-context-contract.json",
+    "rule": "WebEngine supplies normalized IAM identity context but does not authenticate credentials or own session state"
+  },
   "accessCoreDecision": {
     "input": [
       "subject",
@@ -11,12 +18,16 @@
     "output": "allow | deny"
   },
   "webEngineRole": [
-    "supply available identity context",
-    "request an AccessCore decision when a projection requires authorization",
-    "mount or withhold the projection according to the decision"
+    "load and normalize available IAM identity context",
+    "preserve anonymous identity separately from authorization denial",
+    "request an AccessCore decision when a projection or action requires authorization",
+    "mount or withhold the projection according to the AccessCore decision"
   ],
   "mustNot": [
-    "implement authorization policy",
+    "implement IAM authentication or session authority",
+    "persist passwords or raw IAM session/bearer tokens",
+    "translate IAM management tier into application permissions",
+    "implement AccessCore authorization policy",
     "infer permissions from UI state",
     "treat a hidden projector as a service-side security boundary"
   ]
