@@ -6,7 +6,10 @@ import {
   validateActionRecord,
   freezeActionRecord,
   createActionRegistry,
+  actionIdToDwhSymbol,
+  loadActionDeclaration,
   executeAction,
+  createDwhAdapter,
   bindActionControl,
 } from '../webengine.js';
 
@@ -139,4 +142,48 @@ test('action binding reports executor failure without changing action authority'
 
   await control.dispatch('click');
   assert.deepEqual(diagnostics, [['domain failed', 'LMTS:refresh']]);
+});
+
+
+test('maps Action identity to exact DWH symbol', () => {
+  assert.equal(actionIdToDwhSymbol('LMTS', 'refresh'), '#ACTION:LMTS:refresh');
+  assert.throws(() => actionIdToDwhSymbol('bad domain', 'refresh'));
+});
+
+test('loads canonical Action declaration from DWH', async () => {
+  const calls = [];
+  const dwh = createDwhAdapter({
+    project: async (symbol, context) => {
+      calls.push({ symbol, context });
+      return { symbol, data: refresh() };
+    },
+  });
+
+  const result = await loadActionDeclaration({
+    dwh,
+    domain: 'LMTS',
+    id: 'refresh',
+    context: { page: '/lmts/' },
+  });
+
+  assert.deepEqual(calls, [{
+    symbol: '#ACTION:LMTS:refresh',
+    context: { page: '/lmts/' },
+  }]);
+  assert.deepEqual(result, refresh());
+  assert.ok(Object.isFrozen(result));
+});
+
+test('Action declaration fails closed when action reference domain mismatches symbol', async () => {
+  const dwh = createDwhAdapter({
+    project: async symbol => ({
+      symbol,
+      data: { id: 'refresh', label: 'Refresh', action: 'OTHER:refresh' },
+    }),
+  });
+
+  await assert.rejects(
+    () => loadActionDeclaration({ dwh, domain: 'LMTS', id: 'refresh' }),
+    /identity mismatch/,
+  );
 });
