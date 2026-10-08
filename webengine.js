@@ -95,6 +95,11 @@ import {
 } from './core/actions.js';
 
 import {
+  WEB_SYMBOL,
+  validateWebPageProjection,
+  freezeWebPageProjection,
+  loadWebPage,
+  composeWebPage,
   createPageContext,
   createWebEngineShell,
   createProjectorSlot,
@@ -121,7 +126,7 @@ import {
   preflightProjectorAccess,
 } from './core/access.js';
 
-const WEBENGINE_VERSION = '0.15.0';
+const WEBENGINE_VERSION = '0.16.0';
 
 export {
   WEBENGINE_VERSION,
@@ -191,6 +196,11 @@ export {
   loadActionDeclaration,
   executeAction,
   bindActionControl,
+  WEB_SYMBOL,
+  validateWebPageProjection,
+  freezeWebPageProjection,
+  loadWebPage,
+  composeWebPage,
   createPageContext,
   createWebEngineShell,
   createProjectorSlot,
