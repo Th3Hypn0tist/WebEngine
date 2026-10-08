@@ -1,9 +1,6 @@
-import {
-  INSTANCE_ROOT_PATH,
-  resolveInstancePath,
-} from './instance-root.js';
+import { projectDwhSymbol } from './dwh.js';
 
-const SITE_TREE_URL = '/site.json';
+const SITE_TREE_SYMBOL = '#SITE';
 const NODE_KEYS = new Set(['id', 'label', 'path', 'children']);
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 const INDEX_DATA = new WeakMap();
@@ -57,16 +54,12 @@ function validateSiteTree(root) {
     assertId(node.id);
     assertLabel(node.label);
 
-    if (ids.has(node.id)) {
-      throw new Error(`duplicate site node id: ${node.id}`);
-    }
+    if (ids.has(node.id)) throw new Error(`duplicate site node id: ${node.id}`);
     ids.add(node.id);
 
     if (node.path != null) {
       assertPath(node.path);
-      if (paths.has(node.path)) {
-        throw new Error(`duplicate site node path: ${node.path}`);
-      }
+      if (paths.has(node.path)) throw new Error(`duplicate site node path: ${node.path}`);
       paths.add(node.path);
     }
 
@@ -74,9 +67,7 @@ function validateSiteTree(root) {
       throw new TypeError('site node children must be an array when present');
     }
 
-    for (const child of node.children ?? []) {
-      visit(child);
-    }
+    for (const child of node.children ?? []) visit(child);
   }
 
   visit(root);
@@ -131,9 +122,7 @@ function createSiteTreeIndex(root) {
 
 function requireIndex(siteTree) {
   const index = INDEX_DATA.get(siteTree);
-  if (!index) {
-    throw new TypeError('expected a SiteTree index created by createSiteTreeIndex');
-  }
+  if (!index) throw new TypeError('expected a SiteTree index created by createSiteTreeIndex');
   return index;
 }
 
@@ -148,35 +137,16 @@ function resolveSiteNodeByPath(siteTree, path) {
 }
 
 async function loadSiteTree({
-  url = null,
-  instanceRoot = INSTANCE_ROOT_PATH,
-  fetch: fetchImpl = globalThis.fetch,
+  dwh,
+  symbol = SITE_TREE_SYMBOL,
+  context = Object.freeze({}),
 } = {}) {
-  const resolvedUrl = url ?? resolveInstancePath(SITE_TREE_URL, { instanceRoot });
-
-  if (typeof resolvedUrl !== 'string' || !resolvedUrl) {
-    throw new TypeError('site tree URL must be a non-empty string');
-  }
-  if (typeof fetchImpl !== 'function') {
-    throw new TypeError('SiteTree loader requires a fetch implementation');
-  }
-
-  const response = await fetchImpl(resolvedUrl);
-
-  if (!response || typeof response.text !== 'function') {
-    throw new TypeError('SiteTree fetch must return a Response-like object');
-  }
-  if (response.ok === false) {
-    const status = Number.isInteger(response.status) ? ` HTTP ${response.status}` : '';
-    throw new Error(`failed to load SiteTree from ${resolvedUrl}:${status}`.replace(/:$/, ''));
-  }
-
-  const source = await response.text();
-  return createSiteTreeIndex(parseSiteTree(source));
+  const projection = await projectDwhSymbol(dwh, symbol, context);
+  return createSiteTreeIndex(projection.data);
 }
 
 export {
-  SITE_TREE_URL,
+  SITE_TREE_SYMBOL,
   parseSiteTree,
   validateSiteTree,
   createSiteTreeIndex,
